@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Debug Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <h1>JWT Token Debug Test</h1>
+
+    <div>
+        <h3>1. Login Test</h3>
+        <input type="text" id="username" placeholder="Username" value="helani">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="testLogin()">Test Login</button>
+    </div>
+
+    <div>
+        <h3>2. Check Stored Token</h3>
+        <button onclick="checkStoredToken()">Check Token in localStorage</button>
+        <div id="tokenResult"></div>
+    </div>
+
+    <div>
+        <h3>3. Test Authenticated Request</h3>
+        <button onclick="testAuthenticatedRequest()">Test Room API with Token</button>
+        <div id="authResult"></div>
+    </div>
+
+    <div>
+        <h3>4. Clear Token</h3>
+        <button onclick="clearToken()">Clear Token</button>
+    </div>
+
+    <script>
+        function testLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            $.ajax({
+                url: "http://localhost:8080/api/auth/login",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+                success: function (response) {
+                    console.log("Login response:", response);
+
+                    if (response.success && response.token) {
+                        localStorage.setItem('jwtToken', response.token);
+                        localStorage.setItem('userInfo', JSON.stringify(response.user));
+
+                        alert('Login successful! Token stored.');
+                        checkStoredToken();
+                    } else {
+                        alert('Login failed: ' + (response.message || 'Unknown error'));
+                    }
+                },
+                error: function (xhr) {
+                    console.error("Login error:", xhr);
+                    alert('Login failed: ' + (xhr.responseJSON?.message || xhr.responseText || 'Connection error'));
+                }
+            });
+        }
+
+        function checkStoredToken() {
+            const token = localStorage.getItem('jwtToken');
+            const userInfo = localStorage.getItem('userInfo');
+
+            const result = document.getElementById('tokenResult');
+
+            if (token) {
+                result.innerHTML = `
+                    <p><strong>Token Found:</strong> ${token.substring(0, 30)}...</p>
+                    <p><strong>User Info:</strong> ${userInfo || 'Not found'}</p>
+                `;
+            } else {
+                result.innerHTML = '<p style="color: red;"><strong>No token found in localStorage!</strong></p>';
+            }
+        }
+
+        function testAuthenticatedRequest() {
+            const token = localStorage.getItem('jwtToken');
+
+            if (!token) {
+                alert('No token found! Please login first.');
+                return;
+            }
+
+            $.ajax({
+                url: "http://localhost:8080/api/rooms",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                success: function (response) {
+                    console.log("Room API response:", response);
+                    document.getElementById('authResult').innerHTML =
+                        '<p style="color: green;"><strong>Success!</strong> Room API accessible. Found ' + response.length + ' rooms.</p>';
+                },
+                error: function (xhr) {
+                    console.error("Room API error:", xhr);
+                    document.getElementById('authResult').innerHTML =
+                        '<p style="color: red;"><strong>Error:</strong> ' + xhr.status + ' - ' + xhr.responseText + '</p>';
+                }
+            });
+        }
+
+        function clearToken() {
+            localStorage.removeItem('jwtToken');
+            localStorage.removeItem('userInfo');
+            alert('Token cleared!');
+            checkStoredToken();
+        }
+    </script>
+</body>
+
+</html>

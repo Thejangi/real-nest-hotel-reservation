@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify or Cancel Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .header-bg {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            padding: 3rem 0;
+        }
+
+        .modification-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .current-booking {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #007bff;
+        }
+
+        .modification-options {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-card {
+            flex: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-card:hover,
+        .option-card.active {
+            border-color: #007bff;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+
+        .option-card.cancel-option:hover,
+        .option-card.cancel-option.active {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .policy-info {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .cancellation-policy {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .fee-breakdown {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .step-progress {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            background: #e9ecef;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: bold;
+            color: #6c757d;
+            position: relative;
+        }
+
+        .step.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .step.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 2px;
+            background: #e9ecef;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .room-comparison {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .comparison-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .comparison-item:last-child {
+            border-bottom: none;
+        }
+
+        .price-difference {
+            font-weight: bold;
+        }
+
+        .price-increase {
+            color: #dc3545;
+        }
+
+        .price-decrease {
+            color: #28a745;
+        }
+
+        .modification-form {
+            display: none;
+        }
+
+        .cancellation-form {
+            display: none;
+        }
+
+        .reason-selection {
+            margin: 1rem 0;
+        }
+
+        .reason-option {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reason-option:hover,
+        .reason-option.selected {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .refund-info {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <!-- Header -->
+    <div class="header-bg">
+        <div class="container text-center">
+            <h1><i class="fas fa-edit me-3"></i>Modify or Cancel Booking</h1>
+            <p class="lead mb-0">Make changes to your reservation or cancel if needed</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="modification-card p-4">
+                    <!-- Step Progress -->
+                    <div class="step-progress">
+                        <div class="step active" id="step1">1</div>
+                        <div class="step" id="step2">2</div>
+                        <div class="step" id="step3">3</div>
+                    </div>
+
+                    <!-- Step 1: Current Booking Details -->
+                    <div id="currentBookingStep">
+                        <h4 class="text-center mb-4">Current Booking Details</h4>
+
+                        <div class="current-booking">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Booking Information</h6>
+                                    <p><strong>Reference:</strong> <span id="bookingRef">HTL123456</span></p>
+                                    <p><strong>Status:</strong> <span class="badge bg-success">Confirmed</span></p>
+                                    <p><strong>Guest:</strong> <span id="guestName">John Doe</span></p>
+                                    <p><strong>Email:</strong> <span id="guestEmail">john.doe@example.com</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-bed me-2"></i>Accommodation Details</h6>
+                                    <p><strong>Room Type:</strong> <span id="roomType">Deluxe Room</span></p>
+                                    <p><strong>Check-in:</strong> <span id="checkinDate">July 15, 2025</span></p>
+                                    <p><strong>Check-out:</strong> <span id="checkoutDate">July 18, 2025</span></p>
+                                    <p><strong>Nights:</strong> <span id="nights">3</span></p>
+                                    <p><strong>Guests:</strong> <span id="guests">2 Adults, 0 Children</span></p>
+                                    <p><strong>Total Amount:</strong> <strong id="totalAmount">$675.00</strong></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modification Options -->
+                        <div class="row modification-options">
+                            <div class="col-md-6">
+                                <div class="option-card" onclick="selectOption('modify')">
+                                    <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                                    <h5>Modify Booking</h5>
+                                    <p class="text-muted">Change dates, room type, or guest details</p>
+                                    <div class="policy-info">
+                                        <small><i class="fas fa-info-circle"></i> Free modifications up to 24 hours
+                                            before check-in</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="option-card cancel-option" onclick="selectOption('cancel')">
+                                    <i class="fas fa-times-circle fa-3x text-danger mb-3"></i>
+                                    <h5>Cancel Booking</h5>
+                                    <p class="text-muted">Cancel your reservation completely</p>
+                                    <div class="cancellation-policy">
+                                        <small><i class="fas fa-exclamation-triangle"></i> Cancellation fees may
+                                            apply</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Modification Form -->
+                    <div id="modificationStep" class="modification-form">
+                        <h4 class="text-center mb-4">Modify Your Booking</h4>
+
+                        <form id="modificationForm">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">New Check-in Date</label>
+                                    <input type="date" class="form-control" id="newCheckinDate" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">New Check-out Date</label>
+                                    <input type="date" class="form-control" id="newCheckoutDate" required>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Room Type</label>
+                                    <select class="form-select" id="newRoomType">
+                                        <option value="Standard">Standard Room - $150/night</option>
+                                        <option value="Deluxe" selected>Deluxe Room - $200/night</option>
+                                        <option value="Junior Suite">Junior Suite - $300/night</option>
+                                        <option value="Presidential Suite">Presidential Suite - $500/night</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Special Requests</label>
+                                    <input type="text" class="form-control" id="newSpecialRequests"
+                                        placeholder="Any special requirements">
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Adults</label>
+                                    <select class="form-select" id="newAdults">
+                                        <option value="1">1 Adult</option>
+                                        <option value="2" selected>2 Adults</option>
+                                        <option value="3">3 Adults</option>
+                                        <option value="4">4 Adults</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Children</label>
+                                    <select class="form-select" id="newChildren">
+                                        <option value="0" selected>0 Children</option>
+                                        <option value="1">1 Child</option>
+                                        <option value="2">2 Children</option>
+                                        <option value="3">3 Children</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Price Comparison -->
+                            <div class="room-comparison" id="priceComparison" style="display: none;">
+                                <h6><i class="fas fa-calculator me-2"></i>Price Comparison</h6>
+                                <div class="comparison-item">
+                                    <span>Original booking</span>
+                                    <span>$675.00</span>
+                                </div>
+                                <div class="comparison-item">
+                                    <span>New booking</span>
+                                    <span id="newPrice">$675.00</span>
+                                </div>
+                                <div class="comparison-item">
+                                    <span>Modification fee</span>
+                                    <span id="modificationFee">$0.00</span>
+                                </div>
+                                <hr>
+                                <div class="comparison-item">
+                                    <strong>Price difference</strong>
+                                    <strong><span id="priceDifference" class="price-difference">$0.00</span></strong>
+                                </div>
+                            </div>
+
+                            <div class="policy-info">
+                                <h6><i class="fas fa-info-circle"></i> Modification Policy</h6>
+                                <ul class="mb-0">
+                                    <li>Free modifications up to 24 hours before check-in</li>
+                                    <li>Modifications within 24 hours incur a $25 fee</li>
+                                    <li>Room upgrades require additional payment</li>
+                                    <li>Subject to room availability</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button type="button" class="btn btn-secondary me-2" onclick="goBack()">
+                                    <i class="fas fa-arrow-left me-2"></i>Back
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Continue <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: Cancellation Form -->
+                    <div id="cancellationStep" class="cancellation-form">
+                        <h4 class="text-center mb-4">Cancel Your Booking</h4>
+
+                        <div class="cancellation-policy">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Cancellation Policy</h6>
+                            <ul>
+                                <li><strong>Free cancellation:</strong> Up to 24 hours before check-in</li>
+                                <li><strong>24 hours or less:</strong> 50% cancellation fee</li>
+                                <li><strong>No-show:</strong> Full amount charged</li>
+                                <li><strong>Refund timeline:</strong> 5-7 business days</li>
+                            </ul>
+                        </div>
+
+                        <!-- Cancellation Fee Calculation -->
+                        <div class="fee-breakdown">
+                            <h6><i class="fas fa-calculator me-2"></i>Cancellation Summary</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Original booking amount</span>
+                                <span>$675.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Cancellation fee</span>
+                                <span id="cancellationFee">$0.00</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <strong>Refund amount</strong>
+                                <strong id="refundAmount">$675.00</strong>
+                            </div>
+                        </div>
+
+                        <!-- Cancellation Reason -->
+                        <div class="reason-selection">
+                            <h6>Reason for cancellation (Optional)</h6>
+                            <div class="reason-option" data-reason="change-plans">
+                                <i class="fas fa-calendar-times me-2"></i>Change of plans
+                            </div>
+                            <div class="reason-option" data-reason="emergency">
+                                <i class="fas fa-exclamation-circle me-2"></i>Emergency/Personal reasons
+                            </div>
+                            <div class="reason-option" data-reason="work">
+                                <i class="fas fa-briefcase me-2"></i>Work-related changes
+                            </div>
+                            <div class="reason-option" data-reason="health">
+                                <i class="fas fa-heartbeat me-2"></i>Health concerns
+                            </div>
+                            <div class="reason-option" data-reason="other">
+                                <i class="fas fa-comment me-2"></i>Other reason
+                            </div>
+                            <textarea class="form-control mt-2" id="otherReason" placeholder="Please specify..."
+                                style="display: none;"></textarea>
+                        </div>
+
+                        <div class="refund-info">
+                            <h6><i class="fas fa-info-circle"></i> Refund Information</h6>
+                            <p class="mb-0">Your refund will be processed back to your original payment method within
+                                5-7 business days. You will receive an email confirmation once the refund is initiated.
+                            </p>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-secondary me-2" onclick="goBack()">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="proceedWithCancellation()">
+                                <i class="fas fa-times me-2"></i>Cancel Booking
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Confirmation -->
+                    <div id="confirmationStep" style="display: none;">
+                        <div class="text-center">
+                            <div id="modificationSuccess" style="display: none;">
+                                <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
+                                <h4>Booking Modified Successfully!</h4>
+                                <p>Your booking has been updated. You will receive a confirmation email shortly.</p>
+                                <div class="alert alert-info">
+                                    <strong>New Booking Reference:</strong> <span
+                                        id="newBookingRef">HTL123456-MOD</span>
+                                </div>
+                            </div>
+
+                            <div id="cancellationSuccess" style="display: none;">
+                                <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
+                                <h4>Booking Cancelled Successfully</h4>
+                                <p>Your booking has been cancelled. You will receive a confirmation email with refund
+                                    details.</p>
+                                <div class="alert alert-success">
+                                    <strong>Refund Amount:</strong> <span id="finalRefundAmount">$675.00</span><br>
+                                    <strong>Processing Time:</strong> 5-7 business days
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button class="btn btn-primary me-2" onclick="goToGuestPortal()">
+                                    <i class="fas fa-user me-2"></i>View My Bookings
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="makeNewBooking()">
+                                    <i class="fas fa-plus me-2"></i>Make New Booking
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let currentAction = '';
+        let selectedReason = '';
+        let currentBooking = {
+            reference: 'HTL123456',
+            guestName: 'John Doe',
+            guestEmail: 'john.doe@example.com',
+            roomType: 'Deluxe Room',
+            checkinDate: '2025-07-15',
+            checkoutDate: '2025-07-18',
+            nights: 3,
+            adults: 2,
+            children: 0,
+            totalAmount: 675.00
+        };
+
+        const roomPrices = {
+            'Standard': 150,
+            'Deluxe': 200,
+            'Junior Suite': 300,
+            'Presidential Suite': 500
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadBookingData();
+            setupEventListeners();
+            calculateCancellationFee();
+        });
+
+        function loadBookingData() {
+            // In real app, this would come from URL params or API
+            document.getElementById('bookingRef').textContent = currentBooking.reference;
+            document.getElementById('guestName').textContent = currentBooking.guestName;
+            document.getElementById('guestEmail').textContent = currentBooking.guestEmail;
+            document.getElementById('roomType').textContent = currentBooking.roomType;
+            document.getElementById('checkinDate').textContent = new Date(currentBooking.checkinDate).toLocaleDateString();
+            document.getElementById('checkoutDate').textContent = new Date(currentBooking.checkoutDate).toLocaleDateString();
+            document.getElementById('nights').textContent = currentBooking.nights;
+            document.getElementById('guests').textContent = `${currentBooking.adults} Adults, ${currentBooking.children} Children`;
+            document.getElementById('totalAmount').textContent = `$${currentBooking.totalAmount.toFixed(2)}`;
+
+            // Set form defaults
+            document.getElementById('newCheckinDate').value = currentBooking.checkinDate;
+            document.getElementById('newCheckoutDate').value = currentBooking.checkoutDate;
+            document.getElementById('newRoomType').value = currentBooking.roomType;
+            document.getElementById('newAdults').value = currentBooking.adults;
+            document.getElementById('newChildren').value = currentBooking.children;
+        }
+
+        function setupEventListeners() {
+            // Form inputs that affect price calculation
+            document.getElementById('newCheckinDate').addEventListener('change', calculateNewPrice);
+            document.getElementById('newCheckoutDate').addEventListener('change', calculateNewPrice);
+            document.getElementById('newRoomType').addEventListener('change', calculateNewPrice);
+
+            // Modification form submission
+            document.getElementById('modificationForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                proceedWithModification();
+            });
+
+            // Cancellation reason selection
+            document.querySelectorAll('.reason-option').forEach(option => {
+                option.addEventListener('click', function () {
+                    document.querySelectorAll('.reason-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedReason = this.dataset.reason;
+
+                    const otherReasonInput = document.getElementById('otherReason');
+                    if (selectedReason === 'other') {
+                        otherReasonInput.style.display = 'block';
+                        otherReasonInput.focus();
+                    } else {
+                        otherReasonInput.style.display = 'none';
+                    }
+                });
+            });
+
+            // Set minimum dates
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('newCheckinDate').min = today;
+        }
+
+        function selectOption(action) {
+            currentAction = action;
+            document.querySelectorAll('.option-card').forEach(card => card.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            setTimeout(() => {
+                goToStep(2);
+                if (action === 'modify') {
+                    showModificationForm();
+                } else {
+                    showCancellationForm();
+                }
+            }, 500);
+        }
+
+        function showModificationForm() {
+            document.getElementById('modificationStep').style.display = 'block';
+            document.getElementById('cancellationStep').style.display = 'none';
+            calculateNewPrice();
+        }
+
+        function showCancellationForm() {
+            document.getElementById('cancellationStep').style.display = 'block';
+            document.getElementById('modificationStep').style.display = 'none';
+        }
+
+        function calculateNewPrice() {
+            const newCheckin = new Date(document.getElementById('newCheckinDate').value);
+            const newCheckout = new Date(document.getElementById('newCheckoutDate').value);
+            const newRoomType = document.getElementById('newRoomType').value;
+
+            if (!newCheckin || !newCheckout || newCheckout <= newCheckin) {
+                document.getElementById('priceComparison').style.display = 'none';
+                return;
+            }
+
+            const newNights = Math.ceil((newCheckout - newCheckin) / (1000 * 60 * 60 * 24));
+            const roomPrice = roomPrices[newRoomType] || 200;
+            const newTotalPrice = newNights * roomPrice;
+
+            // Check if modification is within 24 hours
+            const checkinTime = new Date(currentBooking.checkinDate).getTime();
+            const now = new Date().getTime();
+            const hoursUntilCheckin = (checkinTime - now) / (1000 * 60 * 60);
+            const modificationFee = hoursUntilCheckin < 24 ? 25 : 0;
+
+            const originalPrice = currentBooking.totalAmount;
+            const priceDifference = newTotalPrice + modificationFee - originalPrice;
+
+            // Update UI
+            document.getElementById('newPrice').textContent = `$${newTotalPrice.toFixed(2)}`;
+            document.getElementById('modificationFee').textContent = `$${modificationFee.toFixed(2)}`;
+
+            const diffElement = document.getElementById('priceDifference');
+            if (priceDifference > 0) {
+                diffElement.textContent = `+$${priceDifference.toFixed(2)}`;
+                diffElement.className = 'price-difference price-increase';
+            } else if (priceDifference < 0) {
+                diffElement.textContent = `-$${Math.abs(priceDifference).toFixed(2)}`;
+                diffElement.className = 'price-difference price-decrease';
+            } else {
+                diffElement.textContent = '$0.00';
+                diffElement.className = 'price-difference';
+            }
+
+            document.getElementById('priceComparison').style.display = 'block';
+        }
+
+        function calculateCancellationFee() {
+            const checkinTime = new Date(currentBooking.checkinDate).getTime();
+            const now = new Date().getTime();
+            const hoursUntilCheckin = (checkinTime - now) / (1000 * 60 * 60);
+
+            let cancellationFee = 0;
+            if (hoursUntilCheckin < 24) {
+                cancellationFee = currentBooking.totalAmount * 0.5; // 50% fee
+            }
+
+            const refundAmount = currentBooking.totalAmount - cancellationFee;
+
+            document.getElementById('cancellationFee').textContent = `$${cancellationFee.toFixed(2)}`;
+            document.getElementById('refundAmount').textContent = `$${refundAmount.toFixed(2)}`;
+            document.getElementById('finalRefundAmount').textContent = `$${refundAmount.toFixed(2)}`;
+        }
+
+        function goToStep(step) {
+            // Update step indicators
+            document.querySelectorAll('.step').forEach((el, index) => {
+                el.classList.remove('active', 'completed');
+                if (index + 1 < step) el.classList.add('completed');
+                else if (index + 1 === step) el.classList.add('active');
+            });
+
+            // Show/hide sections
+            document.getElementById('currentBookingStep').style.display = step === 1 ? 'block' : 'none';
+            document.getElementById('modificationStep').style.display =
+                (step === 2 && currentAction === 'modify') ? 'block' : 'none';
+            document.getElementById('cancellationStep').style.display =
+                (step === 2 && currentAction === 'cancel') ? 'block' : 'none';
+            document.getElementById('confirmationStep').style.display = step === 3 ? 'block' : 'none';
+        }
+
+        function goBack() {
+            goToStep(1);
+            currentAction = '';
+            document.querySelectorAll('.option-card').forEach(card => card.classList.remove('active'));
+        }
+
+        function proceedWithModification() {
+            const newCheckin = document.getElementById('newCheckinDate').value;
+            const newCheckout = document.getElementById('newCheckoutDate').value;
+
+            if (new Date(newCheckout) <= new Date(newCheckin)) {
+                Swal.fire('Error', 'Check-out date must be after check-in date', 'error');
+                return;
+            }
+
+            Swal.fire({
+                title: 'Confirm Modification',
+                text: 'Are you sure you want to modify your booking? This action cannot be undone.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Modify',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    processModification();
+                }
+            });
+        }
+
+        function processModification() {
+            // Show loading
+            Swal.fire({
+                title: 'Processing Modification...',
+                text: 'Please wait while we update your booking',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            // Simulate API call
+            setTimeout(() => {
+                Swal.close();
+
+                // Generate new booking reference
+                const newRef = currentBooking.reference + '-MOD';
+                document.getElementById('newBookingRef').textContent = newRef;
+
+                // Show success
+                document.getElementById('modificationSuccess').style.display = 'block';
+                document.getElementById('cancellationSuccess').style.display = 'none';
+                goToStep(3);
+
+                // Update localStorage (for demo)
+                updateBookingInStorage('modified');
+            }, 3000);
+        }
+
+        function proceedWithCancellation() {
+            Swal.fire({
+                title: 'Confirm Cancellation',
+                text: 'Are you sure you want to cancel your booking? This action cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Cancel Booking',
+                cancelButtonText: 'Keep Booking',
+                confirmButtonColor: '#dc3545'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    processCancellation();
+                }
+            });
+        }
+
+        function processCancellation() {
+            // Show loading
+            Swal.fire({
+                title: 'Processing Cancellation...',
+                text: 'Please wait while we cancel your booking',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            // Simulate API call
+            setTimeout(() => {
+                Swal.close();
+
+                // Show success
+                document.getElementById('cancellationSuccess').style.display = 'block';
+                document.getElementById('modificationSuccess').style.display = 'none';
+                goToStep(3);
+
+                // Update localStorage (for demo)
+                updateBookingInStorage('cancelled');
+            }, 3000);
+        }
+
+        function updateBookingInStorage(action) {
+            // Update booking status in localStorage for demo
+            const bookings = JSON.parse(localStorage.getItem('customerBookings') || '[]');
+            const bookingIndex = bookings.findIndex(b => b.reference === currentBooking.reference);
+
+            if (bookingIndex !== -1) {
+                if (action === 'cancelled') {
+                    bookings[bookingIndex].status = 'Cancelled';
+                } else if (action === 'modified') {
+                    bookings[bookingIndex].status = 'Modified';
+                    bookings[bookingIndex].checkin = document.getElementById('newCheckinDate').value;
+                    bookings[bookingIndex].checkout = document.getElementById('newCheckoutDate').value;
+                    bookings[bookingIndex].room.type = document.getElementById('newRoomType').value;
+                    bookings[bookingIndex].adults = document.getElementById('newAdults').value;
+                    bookings[bookingIndex].children = document.getElementById('newChildren').value;
+                }
+                localStorage.setItem('customerBookings', JSON.stringify(bookings));
+            }
+        }
+
+        function goToGuestPortal() {
+            window.location.href = 'guest-portal.html';
+        }
+
+        function makeNewBooking() {
+            window.location.href = 'customer-booking.html';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set checkout minimum date when checkin changes
+            document.getElementById('newCheckinDate').addEventListener('change', function () {
+                const checkinDate = new Date(this.value);
+                checkinDate.setDate(checkinDate.getDate() + 1);
+                document.getElementById('newCheckoutDate').min = checkinDate.toISOString().split('T')[0];
+            });
+
+            // Get booking data from URL parameters (in real app)
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingRef = urlParams.get('ref');
+            if (bookingRef) {
+                // Load specific booking data
+                currentBooking.reference = bookingRef;
+                loadBookingData();
+            }
+        });
+    </script>
+    <!-- Include customer utilities -->
+    <script src="assets/js/customer-utils.js"></script>
+</body>
+
+</html>

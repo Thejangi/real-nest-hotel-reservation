@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Nest Reservation - Book Your Stay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3') center/cover;
+            height: 60vh;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .booking-card {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            margin-top: -100px;
+            background: white;
+            z-index: 10;
+            position: relative;
+        }
+
+        .room-card {
+            transition: transform 0.3s;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .room-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .price-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff6b35;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+        }
+
+        .amenity-icon {
+            color: #28a745;
+            margin-right: 8px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            background: #e9ecef;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 15px;
+            font-weight: bold;
+            color: #6c757d;
+        }
+
+        .step.active {
+            background: #ff6b35;
+            color: white;
+        }
+
+        .step.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background: #e9ecef;
+            right: -22px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: #ff6b35 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-hotel me-2"></i>Real Nest</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#rooms">Rooms</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#amenities">Amenities</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="guest-portal.html">My Bookings</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 mb-4">Book Your Perfect Stay</h1>
+            <p class="lead">Experience luxury and comfort at Real Nest</p>
+        </div>
+    </section>
+
+    <!-- Booking Form Card -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card booking-card p-4">
+                    <!-- Step Indicator -->
+                    <div class="step-indicator mb-4">
+                        <div class="step active" id="step1">1</div>
+                        <div class="step" id="step2">2</div>
+                        <div class="step" id="step3">3</div>
+                        <div class="step" id="step4">4</div>
+                    </div>
+
+                    <!-- Step 1: Search -->
+                    <div id="searchStep" class="booking-step">
+                        <h4 class="text-center mb-4">Search Available Rooms</h4>
+                        <form id="searchForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Check-in Date</label>
+                                    <input type="date" class="form-control" id="checkinDate" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Check-out Date</label>
+                                    <input type="date" class="form-control" id="checkoutDate" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Adults</label>
+                                    <select class="form-select" id="adults">
+                                        <option value="1">1 Adult</option>
+                                        <option value="2" selected>2 Adults</option>
+                                        <option value="3">3 Adults</option>
+                                        <option value="4">4 Adults</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Children</label>
+                                    <select class="form-select" id="children">
+                                        <option value="0" selected>0 Children</option>
+                                        <option value="1">1 Child</option>
+                                        <option value="2">2 Children</option>
+                                        <option value="3">3 Children</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Special Requests (Optional)</label>
+                                    <textarea class="form-control" id="specialRequests" rows="2"
+                                        placeholder="Any special requirements..."></textarea>
+                                </div>
+                            </div>
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg px-5">
+                                    <i class="fas fa-search me-2"></i>Search Rooms
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: Room Selection -->
+                    <div id="roomStep" class="booking-step" style="display:none;">
+                        <h4 class="text-center mb-4">Select Your Room</h4>
+                        <div id="roomResults" class="row g-4">
+                            <!-- Rooms will be populated here -->
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-secondary me-2" onclick="goToStep(1)">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Guest Information -->
+                    <div id="guestStep" class="booking-step" style="display:none;">
+                        <h4 class="text-center mb-4">Guest Information</h4>
+                        <form id="guestForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">First Name *</label>
+                                    <input type="text" class="form-control" id="firstName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Last Name *</label>
+                                    <input type="text" class="form-control" id="lastName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone Number *</label>
+                                    <input type="tel" class="form-control" id="phone" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="address" placeholder="Street Address">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">City</label>
+                                    <input type="text" class="form-control" id="city">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Country</label>
+                                    <select class="form-select" id="country">
+                                        <option value="">Select Country</option>
+                                        <option value="US">United States</option>
+                                        <option value="LK">Sri Lanka</option>
+                                        <option value="IN">India</option>
+                                        <option value="GB">United Kingdom</option>
+                                        <option value="AU">Australia</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                        <label class="form-check-label" for="agreeTerms">
+                                            I agree to the <a href="#" class="text-decoration-none">Terms and
+                                                Conditions</a>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-4">
+                                <button type="button" class="btn btn-secondary me-2" onclick="goToStep(2)">
+                                    <i class="fas fa-arrow-left me-2"></i>Back
+                                </button>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    Continue to Payment <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Step 4: Payment -->
+                    <div id="paymentStep" class="booking-step" style="display:none;">
+                        <h4 class="text-center mb-4">Payment & Confirmation</h4>
+
+                        <!-- Booking Summary -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Booking Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="bookingSummary">
+                                    <!-- Summary will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Options -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Payment Method</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                                id="payNow" value="now" checked>
+                                            <label class="form-check-label" for="payNow">
+                                                <i class="fas fa-credit-card me-2"></i>Pay Now (Credit Card)
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                                id="payLater" value="later">
+                                            <label class="form-check-label" for="payLater">
+                                                <i class="fas fa-clock me-2"></i>Reserve Now, Pay Later (Auto-cancelled
+                                                at 7 PM if unpaid)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Credit Card Form -->
+                                <div id="creditCardForm" class="mt-3">
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label class="form-label">Card Number</label>
+                                            <input type="text" class="form-control" id="cardNumber"
+                                                placeholder="1234 5678 9012 3456" maxlength="19">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Expiry Date</label>
+                                            <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY"
+                                                maxlength="5">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">CVV</label>
+                                            <input type="text" class="form-control" id="cvv" placeholder="123"
+                                                maxlength="3">
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">Cardholder Name</label>
+                                            <input type="text" class="form-control" id="cardholderName"
+                                                placeholder="Name on Card">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-secondary me-2" onclick="goToStep(3)">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </button>
+                            <button type="button" class="btn btn-success btn-lg px-5" onclick="processBooking()">
+                                <i class="fas fa-check me-2"></i>Confirm Booking
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Templates -->
+    <template id="roomTemplate">
+        <div class="col-md-6 col-lg-4">
+            <div class="card room-card h-100">
+                <div class="position-relative">
+                    <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?ixlib=rb-4.0.3&w=400"
+                        class="card-img-top" alt="Room" style="height: 200px; object-fit: cover;">
+                    <div class="price-badge">
+                        <strong>$<span class="room-price">200</span>/night</strong>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title room-type">Deluxe Room</h5>
+                    <p class="card-text text-muted room-description">Spacious room with city view</p>
+                    <div class="amenities mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-wifi amenity-icon"></i>Free WiFi
+                            <i class="fas fa-car amenity-icon ms-2"></i>Parking
+                            <i class="fas fa-swimming-pool amenity-icon ms-2"></i>Pool Access
+                        </small>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100 select-room-btn" data-room-id=""
+                        data-room-type="" data-room-price="">
+                        Select This Room
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <div class="container mt-5 mb-5">
+        <div class="text-center">
+            <p class="text-muted">Questions? Call us at <strong>+1 (555) 123-4567</strong> or email
+                <strong>info@realnesthotel.com</strong></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let currentStep = 1;
+        let selectedRoom = null;
+        let bookingData = {};
+
+        // Set minimum date to today
+        document.getElementById('checkinDate').min = new Date().toISOString().split('T')[0];
+
+        // Update checkout minimum date when checkin changes
+        document.getElementById('checkinDate').addEventListener('change', function () {
+            const checkinDate = new Date(this.value);
+            checkinDate.setDate(checkinDate.getDate() + 1);
+            document.getElementById('checkoutDate').min = checkinDate.toISOString().split('T')[0];
+        });
+
+        // Sample room data
+        const availableRooms = [
+            { id: 1, type: 'Standard Room', price: 150, description: 'Comfortable room with essential amenities', image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?ixlib=rb-4.0.3&w=400' },
+            { id: 2, type: 'Deluxe Room', price: 200, description: 'Spacious room with city view', image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?ixlib=rb-4.0.3&w=400' },
+            { id: 3, type: 'Junior Suite', price: 300, description: 'Luxurious suite with separate living area', image: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&w=400' },
+            { id: 4, type: 'Presidential Suite', price: 500, description: 'Ultimate luxury with panoramic views', image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&w=400' }
+        ];
+
+        // Form submissions
+        document.getElementById('searchForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            searchRooms();
+        });
+
+        document.getElementById('guestForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            goToStep(4);
+        });
+
+        // Payment method toggle
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const creditCardForm = document.getElementById('creditCardForm');
+                creditCardForm.style.display = this.value === 'now' ? 'block' : 'none';
+            });
+        });
+
+        // Card number formatting
+        document.getElementById('cardNumber').addEventListener('input', function () {
+            let value = this.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            this.value = formattedValue;
+        });
+
+        // Expiry date formatting
+        document.getElementById('expiryDate').addEventListener('input', function () {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            this.value = value;
+        });
+
+        function searchRooms() {
+            // Collect search data
+            bookingData.checkin = document.getElementById('checkinDate').value;
+            bookingData.checkout = document.getElementById('checkoutDate').value;
+            bookingData.adults = document.getElementById('adults').value;
+            bookingData.children = document.getElementById('children').value;
+            bookingData.specialRequests = document.getElementById('specialRequests').value;
+
+            // Calculate nights
+            const checkinDate = new Date(bookingData.checkin);
+            const checkoutDate = new Date(bookingData.checkout);
+            bookingData.nights = Math.ceil((checkoutDate - checkinDate) / (1000 * 60 * 60 * 24));
+
+            if (bookingData.nights <= 0) {
+                Swal.fire('Error', 'Check-out date must be after check-in date', 'error');
+                return;
+            }
+
+            // Simulate API call
+            setTimeout(() => {
+                displayRooms();
+                goToStep(2);
+            }, 1000);
+        }
+
+        function displayRooms() {
+            const roomResults = document.getElementById('roomResults');
+            roomResults.innerHTML = '';
+
+            availableRooms.forEach(room => {
+                const roomCard = createRoomCard(room);
+                roomResults.appendChild(roomCard);
+            });
+        }
+
+        function createRoomCard(room) {
+            const template = document.getElementById('roomTemplate');
+            const clone = template.content.cloneNode(true);
+
+            clone.querySelector('.card-img-top').src = room.image;
+            clone.querySelector('.room-type').textContent = room.type;
+            clone.querySelector('.room-price').textContent = room.price;
+            clone.querySelector('.room-description').textContent = room.description;
+
+            const selectBtn = clone.querySelector('.select-room-btn');
+            selectBtn.dataset.roomId = room.id;
+            selectBtn.dataset.roomType = room.type;
+            selectBtn.dataset.roomPrice = room.price;
+            selectBtn.addEventListener('click', () => selectRoom(room));
+
+            return clone;
+        }
+
+        function selectRoom(room) {
+            selectedRoom = room;
+            bookingData.room = room;
+            bookingData.totalPrice = room.price * bookingData.nights;
+
+            Swal.fire({
+                title: 'Room Selected!',
+                text: `${room.type} - $${room.price}/night for ${bookingData.nights} nights`,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+
+            setTimeout(() => goToStep(3), 1500);
+        }
+
+        function goToStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.booking-step').forEach(el => el.style.display = 'none');
+
+            // Update step indicators
+            document.querySelectorAll('.step').forEach((el, index) => {
+                el.classList.remove('active', 'completed');
+                if (index + 1 < step) el.classList.add('completed');
+                else if (index + 1 === step) el.classList.add('active');
+            });
+
+            // Show current step
+            const steps = ['', 'searchStep', 'roomStep', 'guestStep', 'paymentStep'];
+            document.getElementById(steps[step]).style.display = 'block';
+
+            if (step === 4) {
+                displayBookingSummary();
+            }
+
+            currentStep = step;
+        }
+
+        function displayBookingSummary() {
+            const summary = document.getElementById('bookingSummary');
+            const checkinDate = new Date(bookingData.checkin).toLocaleDateString();
+            const checkoutDate = new Date(bookingData.checkout).toLocaleDateString();
+
+            summary.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Room:</strong> ${bookingData.room.type}</p>
+                        <p><strong>Check-in:</strong> ${checkinDate}</p>
+                        <p><strong>Check-out:</strong> ${checkoutDate}</p>
+                        <p><strong>Nights:</strong> ${bookingData.nights}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Guests:</strong> ${bookingData.adults} Adults, ${bookingData.children} Children</p>
+                        <p><strong>Room Rate:</strong> $${bookingData.room.price}/night</p>
+                        <p><strong>Subtotal:</strong> $${bookingData.totalPrice}</p>
+                        <p><strong>Taxes (10%):</strong> $${(bookingData.totalPrice * 0.1).toFixed(2)}</p>
+                        <hr>
+                        <h5><strong>Total: $${(bookingData.totalPrice * 1.1).toFixed(2)}</strong></h5>
+                    </div>
+                </div>
+            `;
+        }
+
+        function processBooking() {
+            // Collect guest information
+            bookingData.guest = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                country: document.getElementById('country').value
+            };
+
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            bookingData.paymentMethod = paymentMethod;
+
+            if (paymentMethod === 'now') {
+                bookingData.payment = {
+                    cardNumber: document.getElementById('cardNumber').value,
+                    expiryDate: document.getElementById('expiryDate').value,
+                    cvv: document.getElementById('cvv').value,
+                    cardholderName: document.getElementById('cardholderName').value
+                };
+
+                // Validate payment fields
+                if (!bookingData.payment.cardNumber || !bookingData.payment.expiryDate || !bookingData.payment.cvv) {
+                    Swal.fire('Error', 'Please fill in all payment details', 'error');
+                    return;
+                }
+            }
+
+            // Show loading
+            Swal.fire({
+                title: 'Processing Booking...',
+                text: 'Please wait while we confirm your reservation',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            // Simulate API call
+            setTimeout(() => {
+                submitBooking();
+            }, 3000);
+        }
+
+        function submitBooking() {
+            // Simulate successful booking
+            const bookingRef = 'HTL' + Date.now().toString().slice(-6);
+
+            Swal.fire({
+                title: 'Booking Confirmed!',
+                html: `
+                    <div class="text-center">
+                        <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                        <h4 class="mt-3">Booking Reference: <strong>${bookingRef}</strong></h4>
+                        <p>A confirmation email has been sent to <strong>${bookingData.guest.email}</strong></p>
+                        <div class="mt-3">
+                            <button class="btn btn-primary me-2" onclick="window.location.href='guest-portal.html'">View Booking</button>
+                            <button class="btn btn-outline-secondary" onclick="window.location.reload()">Book Another</button>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                allowOutsideClick: false
+            });
+
+            // Store booking in localStorage for demo
+            const bookings = JSON.parse(localStorage.getItem('customerBookings') || '[]');
+            bookings.push({
+                ...bookingData,
+                reference: bookingRef,
+                status: paymentMethod === 'now' ? 'Confirmed' : 'Pending Payment',
+                bookingDate: new Date().toISOString()
+            });
+            localStorage.setItem('customerBookings', JSON.stringify(bookings));
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set default dates
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dayAfter = new Date(tomorrow);
+            dayAfter.setDate(dayAfter.getDate() + 1);
+
+            document.getElementById('checkinDate').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('checkoutDate').value = dayAfter.toISOString().split('T')[0];
+        });
+    </script>
+    <!-- Include customer utilities -->
+    <script src="assets/js/customer-utils.js"></script>
+</body>
+
+</html>

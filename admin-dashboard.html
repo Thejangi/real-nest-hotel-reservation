@@ -1,0 +1,761 @@
+<!-- updated-admin-dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Hotel Management System</title>
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        section {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #fff;
+            transition: width .3s;
+            overflow: hidden;
+            border-right: 3px solid #ff6b35;
+            box-shadow: 2px 0 25px rgba(0, 0, 0, .25);
+        }
+
+        .sidebar.expanded {
+            width: 280px;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar-header {
+            padding: 20px 15px 10px;
+            border-bottom: 1px solid rgba(255, 107, 53, .2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 107, 53, .1);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            color: #ff6b35;
+            font-size: 1.4rem;
+            margin-right: 10px;
+            transition: margin .3s;
+        }
+
+        .logo-text {
+            color: #ff6b35;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: opacity .3s;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #ff6b35;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all .2s;
+            margin-left: 15px;
+        }
+
+        .toggle-btn:hover {
+            color: #ff8c42;
+            background: rgba(255, 107, 53, .2);
+            transform: scale(1.1);
+        }
+
+        .nav-items {
+            list-style: none;
+            padding: 0 10px;
+            margin-top: 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .nav-items li {
+            margin-bottom: 8px;
+        }
+
+        .nav-items button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background: none;
+            border: none;
+            color: #fff;
+            padding: 14px 15px;
+            cursor: pointer;
+            transition: all .3s;
+            font-size: .95rem;
+            white-space: nowrap;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-items button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-items button:hover::before {
+            left: 100%;
+        }
+
+        .nav-items button:hover {
+            background: linear-gradient(45deg, #ff6b35, #ff8c42);
+            transform: translateX(5px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, .4);
+        }
+
+        .nav-items button.active {
+            background: linear-gradient(45deg, rgba(255, 107, 53, .3), rgba(255, 140, 66, .3));
+            border-left: 4px solid #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, .2);
+        }
+
+        .icon {
+            font-size: 1.1rem;
+            width: 30px;
+            text-align: center;
+            color: #ff6b35;
+            flex-shrink: 0;
+            transition: all .3s;
+        }
+
+        .nav-items button:hover .icon {
+            color: white;
+            transform: scale(1.2);
+        }
+
+        .label {
+            margin-left: 12px;
+            transition: opacity .3s;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar.collapsed .label {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin-left: 0;
+        }
+
+        .sidebar.collapsed .icon {
+            font-size: 1.4rem;
+        }
+
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .content {
+            flex-grow: 1;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .summary-cards .card {
+            min-height: 140px;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+            color: white;
+            border: 2px solid #ff6b35;
+            transition: all .3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-cards .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .summary-cards .card:hover::before {
+            left: 100%;
+        }
+
+        .summary-cards .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 107, 53, .3);
+        }
+
+        .summary-cards .card-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .iframe-wrapper {
+            display: none;
+            height: calc(100vh - 200px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .1);
+        }
+
+        .iframe-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .user-info {
+            margin-top: auto;
+            padding: 15px;
+            border-top: 1px solid rgba(255, 107, 53, .2);
+            background: rgba(255, 107, 53, .05);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .nav-section {
+            margin-bottom: 20px;
+            padding: 0 15px;
+        }
+
+        .nav-section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #ff6b35;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .sidebar.collapsed .nav-section-title {
+            display: none;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .welcome-header {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, .1);
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            background: linear-gradient(45deg, #ff6b35, #ff8c42);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            transition: all .3s;
+        }
+
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, .4);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // Protect - Check authentication
+        const user = JSON.parse(localStorage.getItem('user')) || {};
+        if (!user.name) location.replace('login.html');
+    </script>
+
+    <section>
+        <div class="sidebar expanded" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-section">
+                    <i class="fas fa-user-shield logo-icon"></i>
+                    <div class="logo-text">Admin Panel</div>
+                </div>
+                <button class="toggle-btn" id="toggleBtn">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Dashboard</div>
+                <ul class="nav-items">
+                    <li>
+                        <button data-action="dashboard">
+                            <i class="fas fa-home icon"></i>
+                            <span class="label">Dashboard Overview</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Reservations</div>
+                <ul class="nav-items">
+                    <li>
+                        <button data-path="booking-form.html">
+                            <i class="fas fa-calendar-check icon"></i>
+                            <span class="label">Booking Management</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button data-path="checkin.html">
+                            <i class="fas fa-sign-in-alt icon"></i>
+                            <span class="label">Check-In / Check-Out</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button data-path="travel-agency.html">
+                            <i class="fas fa-plane icon"></i>
+                            <span class="label">Block Bookings</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Property Management</div>
+                <ul class="nav-items">
+                    <li>
+                        <button data-path="room-management.html">
+                            <i class="fas fa-bed icon"></i>
+                            <span class="label">Room Management</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button data-path="hotel-management.html">
+                            <i class="fas fa-building icon"></i>
+                            <span class="label">Hotel Management</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Customer Relations</div>
+                <ul class="nav-items">
+                    <li>
+                        <button data-path="customer-management.html">
+                            <i class="fas fa-users icon"></i>
+                            <span class="label">Customer Management</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button data-path="travel-agency.html">
+                            <i class="fas fa-plane-departure icon"></i>
+                            <span class="label">Travel Agencies</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Financial</div>
+                <ul class="nav-items">
+                    <li>
+                        <button data-path="payment-management.html">
+                            <i class="fas fa-credit-card icon"></i>
+                            <span class="label">Payment Management</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Administration</div>
+                <ul class="nav-items">
+                    <li>
+                        <button data-path="user-management.html">
+                            <i class="fas fa-user-cog icon"></i>
+                            <span class="label">User Management</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Analytics</div>
+                <ul class="nav-items">
+                    <li>
+                        <button data-path="enhanced-manager-reports.html">
+                            <i class="fas fa-chart-line icon"></i>
+                            <span class="label">Advanced Reports</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button data-path="report-management.html">
+                            <i class="fas fa-chart-bar icon"></i>
+                            <span class="label">Standard Reports</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- User info fixed to bottom -->
+            <div class="user-info d-flex align-items-center gap-2">
+                <div class="status-indicator"></div>
+                <img id="userAvatar" src="https://i.pravatar.cc/36?u=admin@example.com" alt="Admin"
+                    class="rounded-circle" style="width:32px; height:32px;" />
+                <div class="flex-grow-1">
+                    <div id="userName" class="text-white fw-semibold">Administrator</div>
+                    <small class="text-muted">System Admin</small>
+                </div>
+                <button id="logoutBtn" class="btn btn-sm btn-link p-0 text-white" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Welcome Header -->
+            <div class="welcome-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">Welcome back, Administrator</h2>
+                        <p class="mb-0 text-muted">Hotel Management System - Complete Overview</p>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="showQuickBooking()">
+                            <i class="fas fa-plus"></i> Quick Booking
+                        </button>
+                        <button class="quick-action-btn" onclick="showSystemStatus()">
+                            <i class="fas fa-cog"></i> System Status
+                        </button>
+                        <button class="quick-action-btn" onclick="exportDailyReport()">
+                            <i class="fas fa-download"></i> Daily Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row summary-cards mb-4" id="dashboardSummary">
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-users fa-3x mb-3"></i>
+                            <h5 class="card-title">Total Customers</h5>
+                            <p class="card-text fs-3">1,247</p>
+                            <small class="text-success"><i class="fas fa-arrow-up"></i> +15% this month</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-calendar-check fa-3x mb-3"></i>
+                            <h5 class="card-title">Active Bookings</h5>
+                            <p class="card-text fs-3">89</p>
+                            <small class="text-info"><i class="fas fa-clock"></i> 23 checking in today</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-bed fa-3x mb-3"></i>
+                            <h5 class="card-title">Room Occupancy</h5>
+                            <p class="card-text fs-3">78.5%</p>
+                            <small class="text-warning"><i class="fas fa-chart-line"></i> Above average</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-dollar-sign fa-3x mb-3"></i>
+                            <h5 class="card-title">Revenue Today</h5>
+                            <p class="card-text fs-3">$12,450</p>
+                            <small class="text-success"><i class="fas fa-arrow-up"></i> +8.2% vs yesterday</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-plane fa-3x mb-3"></i>
+                            <h5 class="card-title">Block Bookings</h5>
+                            <p class="card-text fs-3">12</p>
+                            <small class="text-info"><i class="fas fa-building"></i> 8 travel agencies</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-user-times fa-3x mb-3"></i>
+                            <h5 class="card-title">No-Shows Today</h5>
+                            <p class="card-text fs-3">3</p>
+                            <small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Needs
+                                attention</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-star fa-3x mb-3"></i>
+                            <h5 class="card-title">Avg Rating</h5>
+                            <p class="card-text fs-3">4.7/5</p>
+                            <small class="text-success"><i class="fas fa-heart"></i> Excellent service</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-tools fa-3x mb-3"></i>
+                            <h5 class="card-title">Maintenance</h5>
+                            <p class="card-text fs-3">2</p>
+                            <small class="text-warning"><i class="fas fa-wrench"></i> Rooms under repair</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Iframe Section -->
+            <div class="iframe-wrapper" id="iframeWrapper">
+                <iframe id="contentFrame"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Display user info
+        document.getElementById('userName').textContent = user.name || 'Administrator';
+        document.getElementById('logoutBtn').onclick = () => {
+            localStorage.removeItem('user');
+            location.replace('login.html');
+        };
+
+        const iframe = document.getElementById('contentFrame');
+        const iframeWrapper = document.getElementById('iframeWrapper');
+        const dashboardSummary = document.getElementById('dashboardSummary');
+
+        // Handle navigation
+        document.querySelectorAll('.nav-items button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                document.querySelectorAll('.nav-items button').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                button.classList.add('active');
+
+                const action = button.getAttribute('data-action');
+                const path = button.getAttribute('data-path');
+
+                if (action === 'dashboard') {
+                    // Show dashboard
+                    iframeWrapper.style.display = 'none';
+                    dashboardSummary.style.display = 'flex';
+                } else if (path) {
+                    // Load page in iframe
+                    dashboardSummary.style.display = 'none';
+                    iframeWrapper.style.display = 'block';
+                    iframe.src = path;
+                }
+            });
+        });
+
+        // Set first item as active by default
+        document.querySelector('.nav-items button').classList.add('active');
+
+        // Sidebar toggle
+        document.getElementById('toggleBtn').addEventListener('click', () => {
+            const sb = document.getElementById('sidebar');
+            const isExpanded = sb.classList.contains('expanded');
+
+            if (isExpanded) {
+                sb.classList.remove('expanded');
+                sb.classList.add('collapsed');
+                document.querySelector('#toggleBtn i').className = 'fas fa-angle-double-right';
+            } else {
+                sb.classList.remove('collapsed');
+                sb.classList.add('expanded');
+                document.querySelector('#toggleBtn i').className = 'fas fa-angle-double-left';
+            }
+        });
+
+        // Quick action functions
+        function showQuickBooking() {
+            Swal.fire({
+                title: 'Quick Booking',
+                html: `
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <input type="text" class="form-control" placeholder="Customer Name" id="quickCustomer">
+                        </div>
+                        <div class="col-6">
+                            <input type="date" class="form-control" id="quickCheckin">
+                        </div>
+                        <div class="col-6">
+                            <input type="date" class="form-control" id="quickCheckout">
+                        </div>
+                        <div class="col-6">
+                            <select class="form-select" id="quickRoomType">
+                                <option>Standard</option>
+                                <option>Deluxe</option>
+                                <option>Suite</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <input type="number" class="form-control" placeholder="Guests" id="quickGuests" min="1">
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Create Booking',
+                showCancelButton: true,
+                preConfirm: () => {
+                    const customer = document.getElementById('quickCustomer').value;
+                    if (!customer) {
+                        Swal.showValidationMessage('Please enter customer name');
+                        return false;
+                    }
+                    return true;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Success!', 'Quick booking created successfully', 'success');
+                }
+            });
+        }
+
+        function showSystemStatus() {
+            Swal.fire({
+                title: 'System Status',
+                html: `
+                    <div class="text-start">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Database Connection:</span>
+                            <span class="text-success"><i class="fas fa-check-circle"></i> Online</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Payment Gateway:</span>
+                            <span class="text-success"><i class="fas fa-check-circle"></i> Active</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Email Service:</span>
+                            <span class="text-success"><i class="fas fa-check-circle"></i> Running</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Backup System:</span>
+                            <span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Scheduled</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Server Load:</span>
+                            <span class="text-info">45%</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Last Backup:</span>
+                            <span>2 hours ago</span>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Close'
+            });
+        }
+
+        function exportDailyReport() {
+            Swal.fire({
+                title: 'Exporting Daily Report',
+                text: 'Generating comprehensive daily report...',
+                icon: 'info',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                Swal.fire('Success!', 'Daily report has been exported to Downloads folder', 'success');
+            });
+        }
+
+        // Load initial dashboard
+        setTimeout(() => {
+            // Simulate real-time updates
+            setInterval(() => {
+                // Update revenue counter
+                const revenueCard = document.querySelector('.card-text.fs-3');
+                if (revenueCard && revenueCard.textContent.includes('$')) {
+                    const currentValue = parseInt(revenueCard.textContent.replace(/[$,]/g, ''));
+                    const newValue = currentValue + Math.floor(Math.random() * 100);
+                    revenueCard.textContent = '$' + newValue.toLocaleString();
+                }
+            }, 30000); // Update every 30 seconds
+        }, 1000);
+    </script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html>

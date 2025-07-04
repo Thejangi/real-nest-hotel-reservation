@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-In / Check-Out Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="d-flex align-items-center mb-4">
+            <h3 class="mb-0 flex-grow-1">Check-In / Check-Out Management</h3>
+            <button class="btn btn-success" onclick="showWalkInForm()">
+                <i class="fas fa-user-plus"></i> Walk-In Customer
+            </button>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" id="clerkTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="checkin-tab" data-bs-toggle="tab" data-bs-target="#checkin"
+                    type="button">
+                    <i class="fas fa-sign-in-alt"></i> Check-In
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="checkout-tab" data-bs-toggle="tab" data-bs-target="#checkout"
+                    type="button">
+                    <i class="fas fa-sign-out-alt"></i> Check-Out
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="room-status-tab" data-bs-toggle="tab" data-bs-target="#room-status"
+                    type="button">
+                    <i class="fas fa-bed"></i> Room Status
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="billing-tab" data-bs-toggle="tab" data-bs-target="#billing" type="button">
+                    <i class="fas fa-file-invoice-dollar"></i> Billing
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="clerkTabContent">
+            <!-- Check-In Tab -->
+            <div class="tab-pane fade show active" id="checkin" role="tabpanel">
+                <div class="row g-4">
+                    <!-- Pending Check-Ins -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Pending Check-Ins</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Room Type</th>
+                                            <th>Arrival Date</th>
+                                            <th>Nights</th>
+                                            <th>Guests</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pendingCheckInsBody">
+                                        <!-- Populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Quick Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" onclick="searchReservation()">
+                                        <i class="fas fa-search"></i> Search Reservation
+                                    </button>
+                                    <button class="btn btn-success" onclick="showWalkInForm()">
+                                        <i class="fas fa-user-plus"></i> Walk-In Check-In
+                                    </button>
+                                    <button class="btn btn-info" onclick="showRoomAvailability()">
+                                        <i class="fas fa-bed"></i> Room Availability
+                                    </button>
+                                    <button class="btn btn-warning" onclick="showKeyManagement()">
+                                        <i class="fas fa-key"></i> Issue Keys
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Check-Out Tab -->
+            <div class="tab-pane fade" id="checkout" role="tabpanel">
+                <div class="row g-4">
+                    <!-- Pending Check-Outs -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Pending Check-Outs</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Room</th>
+                                            <th>Check-Out Date</th>
+                                            <th>Total Bill</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pendingCheckOutsBody">
+                                        <!-- Populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Late Check-Out Alerts -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-warning">
+                            <div class="card-header bg-warning">
+                                <h5 class="mb-0">Late Check-Outs</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="lateCheckOutsList">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Status Tab -->
+            <div class="tab-pane fade" id="room-status" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Room Status Overview</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="roomStatusGrid" class="row g-3">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Tab -->
+            <div class="tab-pane fade" id="billing" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Active Guest Bills</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Guest</th>
+                                            <th>Room</th>
+                                            <th>Room Charges</th>
+                                            <th>Add-On Charges</th>
+                                            <th>Total</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="activeBillsBody">
+                                        <!-- Populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Add Charges</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="addChargeForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Select Guest</label>
+                                        <select class="form-select" id="chargeGuestSelect" required>
+                                            <option value="">Choose guest...</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Charge Type</label>
+                                        <select class="form-select" id="chargeType" required>
+                                            <option value="restaurant">Restaurant</option>
+                                            <option value="roomService">Room Service</option>
+                                            <option value="laundry">Laundry</option>
+                                            <option value="telephone">Telephone</option>
+                                            <option value="club">Club Facility</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Amount ($)</label>
+                                        <input type="number" step="0.01" class="form-control" id="chargeAmount"
+                                            required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Description</label>
+                                        <input type="text" class="form-control" id="chargeDescription">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Add Charge</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Check-In Modal -->
+        <div class="modal fade" id="checkInModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Check-In Process</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="checkInForm">
+                            <input type="hidden" id="reservationId">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Customer Name</label>
+                                    <input type="text" class="form-control" id="customerName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">ID/Passport Number</label>
+                                    <input type="text" class="form-control" id="customerID" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="customerPhone" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="customerEmail" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Assign Room</label>
+                                    <select class="form-select" id="assignedRoom" required>
+                                        <option value="">Select room...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Number of Keys</label>
+                                    <input type="number" class="form-control" id="numberOfKeys" min="1" max="4"
+                                        value="2">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Check-Out Date</label>
+                                    <input type="date" class="form-control" id="checkOutDate" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Special Requests</label>
+                                    <input type="text" class="form-control" id="specialRequests">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-success" onclick="processCheckIn()">Complete
+                            Check-In</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Check-Out Modal -->
+        <div class="modal fade" id="checkOutModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Check-Out Process</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="checkOutDetails">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="row g-3 mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Payment Method</label>
+                                <select class="form-select" id="paymentMethod" required>
+                                    <option value="cash">Cash</option>
+                                    <option value="credit_card">Credit Card</option>
+                                    <option value="debit_card">Debit Card</option>
+                                    <option value="transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Payment Status</label>
+                                <select class="form-select" id="paymentStatus" required>
+                                    <option value="paid">Paid</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="partial">Partial Payment</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-info" onclick="printBill()">Print Bill</button>
+                        <button type="button" class="btn btn-success" onclick="processCheckOut()">Complete
+                            Check-Out</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Sample data
+        let pendingCheckIns = [
+            { id: 'R001', customer: 'John Doe', roomType: 'Deluxe', arrivalDate: '2025-06-23', nights: 3, guests: 2, hasReservation: true },
+            { id: 'R002', customer: 'Jane Smith', roomType: 'Suite', arrivalDate: '2025-06-23', nights: 2, guests: 4, hasReservation: true },
+            { id: 'R003', customer: 'Mike Johnson', roomType: 'Standard', arrivalDate: '2025-06-23', nights: 1, guests: 1, hasReservation: true }
+        ];
+
+        let pendingCheckOuts = [
+            { id: 'G001', customer: 'Alice Brown', room: '101', checkOutDate: '2025-06-23', totalBill: 450.75, status: 'On Time' },
+            { id: 'G002', customer: 'Bob Wilson', room: '205', checkOutDate: '2025-06-23', totalBill: 650.50, status: 'Late' },
+            { id: 'G003', customer: 'Carol Davis', room: '308', checkOutDate: '2025-06-23', totalBill: 325.25, status: 'On Time' }
+        ];
+
+        let activeBills = [
+            { guest: 'Alice Brown', room: '101', roomCharges: 300, addOnCharges: 150.75, total: 450.75 },
+            { guest: 'Bob Wilson', room: '205', roomCharges: 500, addOnCharges: 150.50, total: 650.50 },
+            { guest: 'Carol Davis', room: '308', roomCharges: 250, addOnCharges: 75.25, total: 325.25 }
+        ];
+
+        let rooms = [];
+        // Generate sample rooms
+        for (let floor = 1; floor <= 3; floor++) {
+            for (let room = 1; room <= 10; room++) {
+                const roomNumber = `${floor}${room.toString().padStart(2, '0')}`;
+                const statuses = ['Available', 'Occupied', 'Maintenance', 'Dirty'];
+                const types = ['Standard', 'Deluxe', 'Suite'];
+                rooms.push({
+                    number: roomNumber,
+                    type: types[Math.floor(Math.random() * types.length)],
+                    status: statuses[Math.floor(Math.random() * statuses.length)],
+                    guest: statuses[1] === 'Occupied' ? `Guest ${roomNumber}` : null
+                });
+            }
+        }
+
+        function loadPendingCheckIns() {
+            const tbody = document.getElementById('pendingCheckInsBody');
+            tbody.innerHTML = '';
+            pendingCheckIns.forEach((checkin, i) => {
+                tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td>${checkin.customer}</td>
+                    <td>${checkin.roomType}</td>
+                    <td>${checkin.arrivalDate}</td>
+                    <td>${checkin.nights}</td>
+                    <td>${checkin.guests}</td>
+                    <td>
+                        <button class="btn btn-sm btn-success" onclick="startCheckIn(${i})">
+                            <i class="fas fa-sign-in-alt"></i> Check-In
+                        </button>
+                    </td>
+                </tr>
+            `);
+            });
+        }
+
+        function loadPendingCheckOuts() {
+            const tbody = document.getElementById('pendingCheckOutsBody');
+            tbody.innerHTML = '';
+            pendingCheckOuts.forEach((checkout, i) => {
+                const statusClass = checkout.status === 'Late' ? 'text-danger fw-bold' : '';
+                tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td>${checkout.customer}</td>
+                    <td>${checkout.room}</td>
+                    <td>${checkout.checkOutDate}</td>
+                    <td>$${checkout.totalBill}</td>
+                    <td class="${statusClass}">${checkout.status}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="startCheckOut(${i})">
+                            <i class="fas fa-sign-out-alt"></i> Check-Out
+                        </button>
+                    </td>
+                </tr>
+            `);
+            });
+
+            // Load late check-outs
+            const lateList = document.getElementById('lateCheckOutsList');
+            const lateCheckOuts = pendingCheckOuts.filter(co => co.status === 'Late');
+            lateList.innerHTML = '';
+            if (lateCheckOuts.length > 0) {
+                lateCheckOuts.forEach(late => {
+                    lateList.insertAdjacentHTML('beforeend', `
+                    <div class="alert alert-warning mb-2">
+                        <strong>${late.customer}</strong><br>
+                        Room ${late.room} - Extra night charges apply
+                    </div>
+                `);
+                });
+            } else {
+                lateList.innerHTML = '<div class="text-muted">No late check-outs</div>';
+            }
+        }
+
+        function loadRoomStatus() {
+            const grid = document.getElementById('roomStatusGrid');
+            grid.innerHTML = '';
+            rooms.forEach(room => {
+                const statusClass = {
+                    'Available': 'bg-success',
+                    'Occupied': 'bg-primary',
+                    'Maintenance': 'bg-warning',
+                    'Dirty': 'bg-danger'
+                }[room.status];
+
+                grid.insertAdjacentHTML('beforeend', `
+                <div class="col-md-2 col-sm-3 col-4">
+                    <div class="card ${statusClass} text-white text-center" style="cursor: pointer;" onclick="showRoomDetails('${room.number}')">
+                        <div class="card-body p-2">
+                            <h6 class="mb-1">${room.number}</h6>
+                            <small>${room.type}</small><br>
+                            <small>${room.status}</small>
+                        </div>
+                    </div>
+                </div>
+            `);
+            });
+        }
+
+        function loadActiveBills() {
+            const tbody = document.getElementById('activeBillsBody');
+            tbody.innerHTML = '';
+            activeBills.forEach((bill, i) => {
+                tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td>${bill.guest}</td>
+                    <td>${bill.room}</td>
+                    <td>$${bill.roomCharges}</td>
+                    <td>$${bill.addOnCharges.toFixed(2)}</td>
+                    <td><strong>$${bill.total.toFixed(2)}</strong></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewBillDetails(${i})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `);
+            });
+
+            // Populate guest select for charges
+            const select = document.getElementById('chargeGuestSelect');
+            select.innerHTML = '<option value="">Choose guest...</option>';
+            activeBills.forEach((bill, i) => {
+                select.insertAdjacentHTML('beforeend', `<option value="${i}">${bill.guest} - Room ${bill.room}</option>`);
+            });
+        }
+
+        function startCheckIn(index) {
+            const checkin = pendingCheckIns[index];
+            document.getElementById('reservationId').value = checkin.id;
+            document.getElementById('customerName').value = checkin.customer;
+
+            // Populate available rooms
+            const roomSelect = document.getElementById('assignedRoom');
+            roomSelect.innerHTML = '<option value="">Select room...</option>';
+            const availableRooms = rooms.filter(r => r.status === 'Available' && r.type === checkin.roomType);
+            availableRooms.forEach(room => {
+                roomSelect.insertAdjacentHTML('beforeend', `<option value="${room.number}">${room.number} - ${room.type}</option>`);
+            });
+
+            // Set default checkout date
+            const checkOutDate = new Date();
+            checkOutDate.setDate(checkOutDate.getDate() + checkin.nights);
+            document.getElementById('checkOutDate').value = checkOutDate.toISOString().split('T')[0];
+
+            new bootstrap.Modal(document.getElementById('checkInModal')).show();
+        }
+
+        function processCheckIn() {
+            const form = document.getElementById('checkInForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const customerName = document.getElementById('customerName').value;
+            const roomNumber = document.getElementById('assignedRoom').value;
+            const keys = document.getElementById('numberOfKeys').value;
+
+            // Update room status
+            const room = rooms.find(r => r.number === roomNumber);
+            if (room) {
+                room.status = 'Occupied';
+                room.guest = customerName;
+            }
+
+            // Remove from pending check-ins
+            const reservationId = document.getElementById('reservationId').value;
+            const index = pendingCheckIns.findIndex(p => p.id === reservationId);
+            if (index > -1) {
+                pendingCheckIns.splice(index, 1);
+            }
+
+            // Add to active bills
+            activeBills.push({
+                guest: customerName,
+                room: roomNumber,
+                roomCharges: 200, // Base rate
+                addOnCharges: 0,
+                total: 200
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById('checkInModal')).hide();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Check-In Complete!',
+                html: `
+                <div class="text-start">
+                    <p><strong>Guest:</strong> ${customerName}</p>
+                    <p><strong>Room:</strong> ${roomNumber}</p>
+                    <p><strong>Keys Issued:</strong> ${keys}</p>
+                </div>
+            `,
+                confirmButtonText: 'Print Welcome Letter'
+            });
+
+            // Refresh displays
+            loadPendingCheckIns();
+            loadRoomStatus();
+            loadActiveBills();
+        }
+
+        function startCheckOut(index) {
+            const checkout = pendingCheckOuts[index];
+            const bill = activeBills.find(b => b.guest === checkout.customer);
+
+            document.getElementById('checkOutDetails').innerHTML = `
+            <div class="row g-3">
+                <div class="col-12">
+                    <h6>Guest Information</h6>
+                    <p><strong>Name:</strong> ${checkout.customer}</p>
+                    <p><strong>Room:</strong> ${checkout.room}</p>
+                    <p><strong>Check-Out Date:</strong> ${checkout.checkOutDate}</p>
+                </div>
+                <div class="col-12">
+                    <h6>Bill Summary</h6>
+                    <table class="table table-sm">
+                        <tr><td>Room Charges:</td><td class="text-end">$${bill ? bill.roomCharges : 0}</td></tr>
+                        <tr><td>Add-On Charges:</td><td class="text-end">$${bill ? bill.addOnCharges.toFixed(2) : '0.00'}</td></tr>
+                        ${checkout.status === 'Late' ? '<tr class="text-danger"><td>Extra Night Charge:</td><td class="text-end">$200.00</td></tr>' : ''}
+                        <tr class="fw-bold border-top"><td>Total:</td><td class="text-end">$${checkout.totalBill + (checkout.status === 'Late' ? 200 : 0)}</td></tr>
+                    </table>
+                </div>
+            </div>
+        `;
+
+            new bootstrap.Modal(document.getElementById('checkOutModal')).show();
+        }
+
+        function processCheckOut() {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const paymentStatus = document.getElementById('paymentStatus').value;
+
+            if (!paymentMethod || !paymentStatus) {
+                Swal.fire('Error', 'Please select payment method and status', 'error');
+                return;
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('checkOutModal')).hide();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Check-Out Complete!',
+                text: 'Guest has been successfully checked out.',
+                confirmButtonText: 'Print Receipt'
+            });
+
+            // Refresh displays
+            loadPendingCheckOuts();
+            loadRoomStatus();
+        }
+
+        function showWalkInForm() {
+            // Clear form for walk-in
+            document.getElementById('checkInForm').reset();
+            document.getElementById('reservationId').value = 'WALK-IN-' + Date.now();
+
+            // Populate all available rooms
+            const roomSelect = document.getElementById('assignedRoom');
+            roomSelect.innerHTML = '<option value="">Select room...</option>';
+            const availableRooms = rooms.filter(r => r.status === 'Available');
+            availableRooms.forEach(room => {
+                roomSelect.insertAdjacentHTML('beforeend', `<option value="${room.number}">${room.number} - ${room.type}</option>`);
+            });
+
+            new bootstrap.Modal(document.getElementById('checkInModal')).show();
+        }
+
+        function searchReservation() {
+            Swal.fire({
+                title: 'Search Reservation',
+                input: 'text',
+                inputLabel: 'Enter booking ID or customer name',
+                inputPlaceholder: 'BK001 or John Doe',
+                showCancelButton: true,
+                confirmButtonText: 'Search'
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    // Simulate search
+                    Swal.fire('Found!', `Reservation for ${result.value} found.`, 'success');
+                }
+            });
+        }
+
+        function showRoomAvailability() {
+            Swal.fire({
+                title: 'Room Availability',
+                html: `
+                <div class="text-start">
+                    <p><strong>Available:</strong> ${rooms.filter(r => r.status === 'Available').length}</p>
+                    <p><strong>Occupied:</strong> ${rooms.filter(r => r.status === 'Occupied').length}</p>
+                    <p><strong>Maintenance:</strong> ${rooms.filter(r => r.status === 'Maintenance').length}</p>
+                    <p><strong>Dirty:</strong> ${rooms.filter(r => r.status === 'Dirty').length}</p>
+                </div>
+            `,
+                confirmButtonText: 'Close'
+            });
+        }
+
+        function showKeyManagement() {
+            Swal.fire({
+                title: 'Key Management',
+                input: 'select',
+                inputOptions: {
+                    'issue': 'Issue New Keys',
+                    'replace': 'Replace Lost Keys',
+                    'deactivate': 'Deactivate Keys'
+                },
+                inputPlaceholder: 'Select action',
+                showCancelButton: true,
+                confirmButtonText: 'Proceed'
+            });
+        }
+
+        function showRoomDetails(roomNumber) {
+            const room = rooms.find(r => r.number === roomNumber);
+            Swal.fire({
+                title: `Room ${roomNumber}`,
+                html: `
+                <div class="text-start">
+                    <p><strong>Type:</strong> ${room.type}</p>
+                    <p><strong>Status:</strong> ${room.status}</p>
+                    ${room.guest ? `<p><strong>Guest:</strong> ${room.guest}</p>` : ''}
+                </div>
+            `,
+                confirmButtonText: 'Close'
+            });
+        }
+
+        // Add charge form handler
+        document.getElementById('addChargeForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const guestIndex = document.getElementById('chargeGuestSelect').value;
+            const chargeType = document.getElementById('chargeType').value;
+            const amount = parseFloat(document.getElementById('chargeAmount').value);
+            const description = document.getElementById('chargeDescription').value;
+
+            if (guestIndex !== '' && amount > 0) {
+                activeBills[guestIndex].addOnCharges += amount;
+                activeBills[guestIndex].total += amount;
+
+                this.reset();
+                loadActiveBills();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Charge Added',
+                    text: `$${amount} ${chargeType} charge added successfully.`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        });
+
+        function viewBillDetails(index) {
+            const bill = activeBills[index];
+            Swal.fire({
+                title: `Bill Details - ${bill.guest}`,
+                html: `
+                <div class="text-start">
+                    <p><strong>Room:</strong> ${bill.room}</p>
+                    <p><strong>Room Charges:</strong> $${bill.roomCharges}</p>
+                    <p><strong>Add-On Charges:</strong> $${bill.addOnCharges.toFixed(2)}</p>
+                    <hr>
+                    <p><strong>Total:</strong> $${bill.total.toFixed(2)}</p>
+                </div>
+            `,
+                confirmButtonText: 'Close'
+            });
+        }
+
+        function printBill() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Printing Bill',
+                text: 'Guest bill is being printed...',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPendingCheckIns();
+            loadPendingCheckOuts();
+            loadRoomStatus();
+            loadActiveBills();
+        });
+    </script>
+</body>
+
+</html>

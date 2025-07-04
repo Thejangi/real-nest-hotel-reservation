@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Confirmation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .email-preview {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .email-header {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .email-content {
+            padding: 2rem;
+        }
+
+        .email-footer {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 0 0 8px 8px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .booking-details-table {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .qr-code-section {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .template-selector {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .template-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .template-card.active {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .template-card:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+        }
+
+        .email-actions {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-sent {
+            background: #28a745;
+        }
+
+        .status-pending {
+            background: #ffc107;
+        }
+
+        .status-failed {
+            background: #dc3545;
+        }
+
+        .social-links a {
+            color: #6c757d;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .social-links a:hover {
+            color: #ff6b35;
+        }
+
+        .btn-action {
+            margin: 0 5px 10px 0;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h2><i class="fas fa-envelope me-3"></i>Email Confirmation System</h2>
+                <p class="text-muted">Manage automated email confirmations for hotel reservations</p>
+            </div>
+        </div>
+
+        <!-- Email Template Selector -->
+        <div class="template-selector">
+            <h4 class="mb-3">Email Templates</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="template-card active" data-template="booking-confirmation">
+                        <h6><i class="fas fa-check-circle text-success me-2"></i>Booking Confirmation</h6>
+                        <small class="text-muted">Sent when booking is confirmed</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="template-card" data-template="payment-reminder">
+                        <h6><i class="fas fa-clock text-warning me-2"></i>Payment Reminder</h6>
+                        <small class="text-muted">Sent for pending payments</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="template-card" data-template="checkin-reminder">
+                        <h6><i class="fas fa-calendar text-info me-2"></i>Check-in Reminder</h6>
+                        <small class="text-muted">Sent 24 hours before check-in</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="template-card" data-template="modification-confirmation">
+                        <h6><i class="fas fa-edit text-primary me-2"></i>Modification Confirmation</h6>
+                        <small class="text-muted">Sent when booking is modified</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="template-card" data-template="cancellation-confirmation">
+                        <h6><i class="fas fa-times-circle text-danger me-2"></i>Cancellation Confirmation</h6>
+                        <small class="text-muted">Sent when booking is cancelled</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="template-card" data-template="feedback-request">
+                        <h6><i class="fas fa-star text-warning me-2"></i>Feedback Request</h6>
+                        <small class="text-muted">Sent after check-out</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Actions -->
+        <div class="email-actions">
+            <div class="row">
+                <div class="col-md-8">
+                    <h5>Email Management</h5>
+                    <button class="btn btn-primary btn-action" onclick="previewEmail()">
+                        <i class="fas fa-eye me-2"></i>Preview Email
+                    </button>
+                    <button class="btn btn-success btn-action" onclick="sendTestEmail()">
+                        <i class="fas fa-paper-plane me-2"></i>Send Test Email
+                    </button>
+                    <button class="btn btn-warning btn-action" onclick="editTemplate()">
+                        <i class="fas fa-edit me-2"></i>Edit Template
+                    </button>
+                    <button class="btn btn-info btn-action" onclick="viewEmailQueue()">
+                        <i class="fas fa-list me-2"></i>Email Queue
+                    </button>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="mb-2">
+                        <small class="text-muted">Email Status</small>
+                    </div>
+                    <div>
+                        <span class="status-indicator status-sent"></span>Sent: 1,247
+                        <span class="status-indicator status-pending ms-3"></span>Pending: 23
+                        <span class="status-indicator status-failed ms-3"></span>Failed: 3
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Email Preview -->
+            <div class="col-lg-8">
+                <div class="email-preview" id="emailPreview">
+                    <!-- Email content will be populated here -->
+                </div>
+            </div>
+
+            <!-- Email Settings -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6><i class="fas fa-cog me-2"></i>Email Settings</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="emailSettingsForm">
+                            <div class="mb-3">
+                                <label class="form-label">Sender Name</label>
+                                <input type="text" class="form-control" id="senderName" value="Real Nest">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Sender Email</label>
+                                <input type="email" class="form-control" id="senderEmail"
+                                    value="noreply@realnesthotel.com">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Reply-to Email</label>
+                                <input type="email" class="form-control" id="replyToEmail"
+                                    value="reservations@realnesthotel.com">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Auto-send Timing</label>
+                                <select class="form-select" id="autoSendTiming">
+                                    <option value="immediate">Immediately</option>
+                                    <option value="5min">5 minutes delay</option>
+                                    <option value="15min">15 minutes delay</option>
+                                    <option value="1hour">1 hour delay</option>
+                                </select>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enableAutoSend" checked>
+                                <label class="form-check-label" for="enableAutoSend">
+                                    Enable automatic emails
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enableSMS" checked>
+                                <label class="form-check-label" for="enableSMS">
+                                    Send SMS notifications
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-save me-2"></i>Save Settings
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Email Statistics -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6><i class="fas fa-chart-bar me-2"></i>Email Statistics</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <h4 class="text-primary">98.2%</h4>
+                                <small class="text-muted">Delivery Rate</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <h4 class="text-success">87.5%</h4>
+                                <small class="text-muted">Open Rate</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-info">42.1%</h4>
+                                <small class="text-muted">Click Rate</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-warning">1.3%</h4>
+                                <small class="text-muted">Bounce Rate</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Queue Modal -->
+    <div class="modal fade" id="emailQueueModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Email Queue</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Recipient</th>
+                                    <th>Template</th>
+                                    <th>Status</th>
+                                    <th>Scheduled</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="emailQueueTableBody">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Editor Modal -->
+    <div class="modal fade" id="templateEditorModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Email Template Editor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Template Variables</h6>
+                            <div class="mb-3">
+                                <button class="btn btn-sm btn-outline-secondary me-1 mb-1"
+                                    onclick="insertVariable('{{guestName}}')">Guest Name</button>
+                                <button class="btn btn-sm btn-outline-secondary me-1 mb-1"
+                                    onclick="insertVariable('{{bookingRef}}')">Booking Ref</button>
+                                <button class="btn btn-sm btn-outline-secondary me-1 mb-1"
+                                    onclick="insertVariable('{{roomType}}')">Room Type</button>
+                                <button class="btn btn-sm btn-outline-secondary me-1 mb-1"
+                                    onclick="insertVariable('{{checkinDate}}')">Check-in Date</button>
+                                <button class="btn btn-sm btn-outline-secondary me-1 mb-1"
+                                    onclick="insertVariable('{{checkoutDate}}')">Check-out Date</button>
+                                <button class="btn btn-sm btn-outline-secondary me-1 mb-1"
+                                    onclick="insertVariable('{{totalAmount}}')">Total Amount</button>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Subject Line</label>
+                                <input type="text" class="form-control" id="emailSubject" placeholder="Email subject">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email Content</label>
+                                <textarea class="form-control" id="emailContent" rows="15"
+                                    placeholder="Email HTML content"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Live Preview</h6>
+                            <div id="templatePreview"
+                                style="border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem; height: 500px; overflow-y: auto;">
+                                <!-- Preview will be updated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveTemplate()">Save Template</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let currentTemplate = 'booking-confirmation';
+
+        const emailTemplates = {
+            'booking-confirmation': {
+                subject: 'Booking Confirmation - Real Nest',
+                content: `
+                    <div class="email-header">
+                        <h1><i class="fas fa-hotel"></i> Real Nest</h1>
+                        <p>Your booking has been confirmed!</p>
+                    </div>
+                    <div class="email-content">
+                        <h3>Dear {{guestName}},</h3>
+                        <p>Thank you for choosing Real Nest! We're delighted to confirm your reservation.</p>
+                        
+                        <div class="booking-details-table">
+                            <h5><i class="fas fa-info-circle"></i> Booking Details</h5>
+                            <table style="width: 100%; margin-top: 1rem;">
+                                <tr><td><strong>Booking Reference:</strong></td><td>{{bookingRef}}</td></tr>
+                                <tr><td><strong>Room Type:</strong></td><td>{{roomType}}</td></tr>
+                                <tr><td><strong>Check-in:</strong></td><td>{{checkinDate}}</td></tr>
+                                <tr><td><strong>Check-out:</strong></td><td>{{checkoutDate}}</td></tr>
+                                <tr><td><strong>Guests:</strong></td><td>{{adults}} Adults, {{children}} Children</td></tr>
+                                <tr><td><strong>Total Amount:</strong></td><td><strong>{{totalAmount}}</strong></td></tr>
+                            </table>
+                        </div>
+
+                        <div class="qr-code-section">
+                            <h6>Quick Check-in QR Code</h6>
+                            <div style="width: 120px; height: 120px; background: #f8f9fa; border: 1px solid #dee2e6; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-qrcode fa-3x text-muted"></i>
+                            </div>
+                            <small class="text-muted">Show this QR code at reception for express check-in</small>
+                        </div>
+
+                        <h5><i class="fas fa-map-marker-alt"></i> Hotel Information</h5>
+                        <p><strong>Address:</strong> 123 Real Nest Street, Colombo, Sri Lanka<br>
+                        <strong>Phone:</strong> +94 11 123 4567<br>
+                        <strong>Email:</strong> info@realnesthotel.com</p>
+
+                        <div style="background: #e7f3ff; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                            <h6><i class="fas fa-info-circle"></i> Important Information</h6>
+                            <ul style="margin: 0; padding-left: 1.5rem;">
+                                <li>Check-in time: 3:00 PM</li>
+                                <li>Check-out time: 11:00 AM</li>
+                                <li>Free cancellation up to 24 hours before check-in</li>
+                                <li>Government-issued ID required at check-in</li>
+                            </ul>
+                        </div>
+
+                        <p>We look forward to welcoming you to Real Nest. If you have any questions, please don't hesitate to contact us.</p>
+                        
+                        <p>Best regards,<br>
+                        The Real Nest Team</p>
+                    </div>
+                `
+            },
+            'payment-reminder': {
+                subject: 'Payment Reminder - Booking {{bookingRef}}',
+                content: `
+                    <div class="email-header">
+                        <h1><i class="fas fa-hotel"></i> Real Nest</h1>
+                        <p>Payment Reminder</p>
+                    </div>
+                    <div class="email-content">
+                        <h3>Dear {{guestName}},</h3>
+                        <p>This is a friendly reminder that payment for your booking is still pending.</p>
+                        
+                        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 1rem; margin: 1rem 0;">
+                            <h5><i class="fas fa-exclamation-triangle text-warning"></i> Payment Required</h5>
+                            <p><strong>Booking Reference:</strong> {{bookingRef}}<br>
+                            <strong>Amount Due:</strong> {{totalAmount}}<br>
+                            <strong>Payment Deadline:</strong> Today at 7:00 PM</p>
+                        </div>
+
+                        <p>Please complete your payment to secure your reservation. Unpaid bookings will be automatically cancelled at 7:00 PM.</p>
+                        
+                        <div style="text-align: center; margin: 2rem 0;">
+                            <a href="#" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                                <i class="fas fa-credit-card"></i> Pay Now
+                            </a>
+                        </div>
+
+                        <p>If you have any questions, please contact us immediately.</p>
+                        
+                        <p>Best regards,<br>
+                        The Real Nest Team</p>
+                    </div>
+                `
+            },
+            'checkin-reminder': {
+                subject: 'Check-in Reminder - Tomorrow at Real Nest',
+                content: `
+                    <div class="email-header">
+                        <h1><i class="fas fa-hotel"></i> Real Nest</h1>
+                        <p>Your stay begins tomorrow!</p>
+                    </div>
+                    <div class="email-content">
+                        <h3>Dear {{guestName}},</h3>
+                        <p>We're excited to welcome you to Real Nest tomorrow! Here's everything you need to know for a smooth check-in.</p>
+                        
+                        <div class="booking-details-table">
+                            <h5><i class="fas fa-calendar-check"></i> Your Arrival Details</h5>
+                            <table style="width: 100%; margin-top: 1rem;">
+                                <tr><td><strong>Check-in Date:</strong></td><td>{{checkinDate}}</td></tr>
+                                <tr><td><strong>Check-in Time:</strong></td><td>3:00 PM onwards</td></tr>
+                                <tr><td><strong>Room Type:</strong></td><td>{{roomType}}</td></tr>
+                                <tr><td><strong>Booking Reference:</strong></td><td>{{bookingRef}}</td></tr>
+                            </table>
+                        </div>
+
+                        <h5><i class="fas fa-clipboard-list"></i> Check-in Checklist</h5>
+                        <ul>
+                            <li>Bring a government-issued photo ID</li>
+                            <li>Have your booking reference ready: <strong>{{bookingRef}}</strong></li>
+                            <li>Arrive after 3:00 PM for express check-in</li>
+                            <li>Contact us if you'll arrive after 10:00 PM</li>
+                        </ul>
+
+                        <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 1rem; margin: 1rem 0;">
+                            <h6><i class="fas fa-mobile-alt"></i> Mobile Check-in Available</h6>
+                            <p>Save time by using our mobile check-in service. Simply show the QR code below at reception.</p>
+                        </div>
+
+                        <p>We can't wait to make your stay memorable!</p>
+                        
+                        <p>Best regards,<br>
+                        The Real Nest Team</p>
+                    </div>
+                `
+            },
+            'modification-confirmation': {
+                subject: 'Booking Modified - {{bookingRef}}',
+                content: `
+                    <div class="email-header">
+                        <h1><i class="fas fa-hotel"></i> Real Nest</h1>
+                        <p>Booking modification confirmed</p>
+                    </div>
+                    <div class="email-content">
+                        <h3>Dear {{guestName}},</h3>
+                        <p>Your booking modification has been successfully processed.</p>
+                        
+                        <div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 1rem; margin: 1rem 0;">
+                            <h5><i class="fas fa-edit"></i> Updated Booking Details</h5>
+                            <table style="width: 100%; margin-top: 1rem;">
+                                <tr><td><strong>Booking Reference:</strong></td><td>{{bookingRef}}</td></tr>
+                                <tr><td><strong>Room Type:</strong></td><td>{{roomType}}</td></tr>
+                                <tr><td><strong>New Check-in:</strong></td><td>{{checkinDate}}</td></tr>
+                                <tr><td><strong>New Check-out:</strong></td><td>{{checkoutDate}}</td></tr>
+                                <tr><td><strong>Updated Total:</strong></td><td><strong>{{totalAmount}}</strong></td></tr>
+                            </table>
+                        </div>
+
+                        <p>Please save this email as your updated confirmation. If you have any questions about these changes, please contact us.</p>
+                        
+                        <p>Best regards,<br>
+                        The Real Nest Team</p>
+                    </div>
+                `
+            },
+            'cancellation-confirmation': {
+                subject: 'Booking Cancelled - {{bookingRef}}',
+                content: `
+                    <div class="email-header">
+                        <h1><i class="fas fa-hotel"></i> Real Nest</h1>
+                        <p>Booking cancellation confirmed</p>
+                    </div>
+                    <div class="email-content">
+                        <h3>Dear {{guestName}},</h3>
+                        <p>We've successfully cancelled your booking as requested. We're sorry to see you go!</p>
+                        
+                        <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 1rem; margin: 1rem 0;">
+                            <h5><i class="fas fa-times-circle"></i> Cancelled Booking</h5>
+                            <p><strong>Booking Reference:</strong> {{bookingRef}}<br>
+                            <strong>Cancellation Date:</strong> {{currentDate}}<br>
+                            <strong>Refund Amount:</strong> {{refundAmount}}<br>
+                            <strong>Refund Timeline:</strong> 5-7 business days</p>
+                        </div>
+
+                        <p>Your refund will be processed back to your original payment method within 5-7 business days.</p>
+                        
+                        <p>We hope to welcome you to Real Nest in the future. Thank you for considering us for your accommodation needs.</p>
+                        
+                        <p>Best regards,<br>
+                        The Real Nest Team</p>
+                    </div>
+                `
+            },
+            'feedback-request': {
+                subject: 'How was your stay at Real Nest?',
+                content: `
+                    <div class="email-header">
+                        <h1><i class="fas fa-hotel"></i> Real Nest</h1>
+                        <p>We hope you enjoyed your stay!</p>
+                    </div>
+                    <div class="email-content">
+                        <h3>Dear {{guestName}},</h3>
+                        <p>Thank you for choosing Real Nest for your recent stay. We hope you had a wonderful experience!</p>
+                        
+                        <div style="text-align: center; background: #f8f9fa; border-radius: 8px; padding: 2rem; margin: 2rem 0;">
+                            <h5>Rate Your Experience</h5>
+                            <div style="font-size: 2rem; margin: 1rem 0;">
+                                <span style="color: #ffc107; cursor: pointer;">★</span>
+                                <span style="color: #ffc107; cursor: pointer;">★</span>
+                                <span style="color: #ffc107; cursor: pointer;">★</span>
+                                <span style="color: #ffc107; cursor: pointer;">★</span>
+                                <span style="color: #ffc107; cursor: pointer;">★</span>
+                            </div>
+                            <a href="#" style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                                <i class="fas fa-star"></i> Leave a Review
+                            </a>
+                        </div>
+
+                        <p>Your feedback helps us improve our services and ensures future guests have an even better experience.</p>
+                        
+                        <p>As a token of our appreciation, here's a special offer for your next stay:</p>
+                        
+                        <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 1rem; margin: 1rem 0; text-align: center;">
+                            <h6><i class="fas fa-gift"></i> 15% OFF Your Next Booking</h6>
+                            <p>Use code: <strong>RETURN15</strong><br>
+                            Valid until: {{nextYear}}</p>
+                        </div>
+
+                        <p>We look forward to welcoming you back soon!</p>
+                        
+                        <p>Best regards,<br>
+                        The Real Nest Team</p>
+                    </div>
+                `
+            }
+        };
+
+        // Sample email queue data
+        const emailQueue = [
+            { recipient: 'john.doe@example.com', template: 'Booking Confirmation', status: 'Sent', scheduled: '2025-06-23 10:30 AM' },
+            { recipient: 'jane.smith@example.com', template: 'Payment Reminder', status: 'Pending', scheduled: '2025-06-23 6:00 PM' },
+            { recipient: 'bob.johnson@example.com', template: 'Check-in Reminder', status: 'Scheduled', scheduled: '2025-06-24 9:00 AM' },
+            { recipient: 'alice.brown@example.com', template: 'Feedback Request', status: 'Failed', scheduled: '2025-06-23 11:00 AM' },
+            { recipient: 'mike.wilson@example.com', template: 'Modification Confirmation', status: 'Sent', scheduled: '2025-06-23 2:15 PM' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeTemplateSelector();
+            loadEmailPreview();
+            setupFormHandlers();
+        });
+
+        function initializeTemplateSelector() {
+            const templateCards = document.querySelectorAll('.template-card');
+            templateCards.forEach(card => {
+                card.addEventListener('click', function () {
+                    templateCards.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    currentTemplate = this.dataset.template;
+                    loadEmailPreview();
+                });
+            });
+        }
+
+        function loadEmailPreview() {
+            const template = emailTemplates[currentTemplate];
+            if (!template) return;
+
+            const sampleData = {
+                guestName: 'John Doe',
+                bookingRef: 'HTL123456',
+                roomType: 'Deluxe Room',
+                checkinDate: 'July 15, 2025',
+                checkoutDate: 'July 18, 2025',
+                adults: '2',
+                children: '0',
+                totalAmount: '$675.00',
+                currentDate: 'June 23, 2025',
+                refundAmount: '$675.00',
+                nextYear: 'June 23, 2026'
+            };
+
+            let emailContent = template.content;
+            Object.keys(sampleData).forEach(key => {
+                const regex = new RegExp(`{{${key}}}`, 'g');
+                emailContent = emailContent.replace(regex, sampleData[key]);
+            });
+
+            const emailFooter = `
+                <div class="email-footer">
+                    <div class="social-links mb-3">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <p><small>Real Nest | 123 Real Nest Street, Colombo, Sri Lanka</small></p>
+                    <p><small>You received this email because you have a booking with us. 
+                    <a href="#" style="color: #6c757d;">Unsubscribe</a> | <a href="#" style="color: #6c757d;">Update Preferences</a></small></p>
+                </div>
+            `;
+
+            document.getElementById('emailPreview').innerHTML = emailContent + emailFooter;
+        }
+
+        function setupFormHandlers() {
+            document.getElementById('emailSettingsForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Settings Saved!',
+                    text: 'Email settings have been updated successfully.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+        }
+
+        function previewEmail() {
+            // Already showing preview, maybe scroll to it
+            document.getElementById('emailPreview').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function sendTestEmail() {
+            Swal.fire({
+                title: 'Send Test Email',
+                html: `
+                    <input type="email" id="testEmailAddress" class="swal2-input" placeholder="Enter email address">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Send Test',
+                preConfirm: () => {
+                    const email = document.getElementById('testEmailAddress').value;
+                    if (!email) {
+                        Swal.showValidationMessage('Please enter an email address');
+                        return false;
+                    }
+                    return email;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Simulate sending test email
+                    Swal.fire({
+                        title: 'Sending...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    setTimeout(() => {
+                        Swal.fire({
+                            title: 'Test Email Sent!',
+                            text: `Test email sent to ${result.value}`,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }, 2000);
+                }
+            });
+        }
+
+        function editTemplate() {
+            const template = emailTemplates[currentTemplate];
+            document.getElementById('emailSubject').value = template.subject;
+            document.getElementById('emailContent').value = template.content;
+
+            updateTemplatePreview();
+
+            const modal = new bootstrap.Modal(document.getElementById('templateEditorModal'));
+            modal.show();
+
+            // Live preview update
+            document.getElementById('emailContent').addEventListener('input', updateTemplatePreview);
+        }
+
+        function updateTemplatePreview() {
+            const content = document.getElementById('emailContent').value;
+            document.getElementById('templatePreview').innerHTML = content || '<p class="text-muted">Start typing to see preview...</p>';
+        }
+
+        function insertVariable(variable) {
+            const textarea = document.getElementById('emailContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+
+            textarea.value = text.substring(0, start) + variable + text.substring(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + variable.length, start + variable.length);
+
+            updateTemplatePreview();
+        }
+
+        function saveTemplate() {
+            const subject = document.getElementById('emailSubject').value;
+            const content = document.getElementById('emailContent').value;
+
+            emailTemplates[currentTemplate].subject = subject;
+            emailTemplates[currentTemplate].content = content;
+
+            Swal.fire({
+                title: 'Template Saved!',
+                text: 'Email template has been updated successfully.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById('templateEditorModal')).hide();
+            loadEmailPreview();
+        }
+
+        function viewEmailQueue() {
+            const tbody = document.getElementById('emailQueueTableBody');
+            tbody.innerHTML = '';
+
+            emailQueue.forEach((email, index) => {
+                const statusClass = {
+                    'Sent': 'success',
+                    'Pending': 'warning',
+                    'Scheduled': 'info',
+                    'Failed': 'danger'
+                }[email.status] || 'secondary';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${email.recipient}</td>
+                        <td>${email.template}</td>
+                        <td><span class="badge bg-${statusClass}">${email.status}</span></td>
+                        <td>${email.scheduled}</td>
+                        <td>
+                            ${email.status === 'Failed' ?
+                        `<button class="btn btn-sm btn-outline-primary" onclick="retryEmail(${index})">Retry</button>` :
+                        `<button class="btn btn-sm btn-outline-secondary" onclick="viewEmailDetails(${index})">View</button>`
+                    }
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const modal = new bootstrap.Modal(document.getElementById('emailQueueModal'));
+            modal.show();
+        }
+
+        function retryEmail(index) {
+            const email = emailQueue[index];
+            Swal.fire({
+                title: 'Retry Email?',
+                text: `Retry sending to ${email.recipient}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Retry'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    email.status = 'Pending';
+                    email.scheduled = new Date().toLocaleString();
+                    viewEmailQueue(); // Refresh the table
+
+                    Swal.fire({
+                        title: 'Email Queued!',
+                        text: 'Email has been added back to the queue.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+
+        function viewEmailDetails(index) {
+            const email = emailQueue[index];
+            Swal.fire({
+                title: 'Email Details',
+                html: `
+                    <div class="text-start">
+                        <p><strong>Recipient:</strong> ${email.recipient}</p>
+                        <p><strong>Template:</strong> ${email.template}</p>
+                        <p><strong>Status:</strong> ${email.status}</p>
+                        <p><strong>Scheduled:</strong> ${email.scheduled}</p>
+                    </div>
+                `,
+                confirmButtonText: 'Close'
+            });
+        }
+    </script>
+    <!-- Include customer utilities -->
+    <script src="assets/js/customer-utils.js"></script>
+</body>
+
+</html>

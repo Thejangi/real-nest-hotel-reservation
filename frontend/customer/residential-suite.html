@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Residential Suites - Extended Stay Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-color: #ff6b35;
+            --secondary-color: #f7931e;
+            --accent-color: #20c997;
+            --dark-color: #2c3e50;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.8), rgba(247, 147, 30, 0.8)),
+                url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&w=1920') center/cover;
+            height: 70vh;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .suite-card {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .suite-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .suite-image {
+            height: 300px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .rate-selector {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .rate-selector.active {
+            border-color: var(--primary-color);
+            background: rgba(111, 66, 193, 0.05);
+        }
+
+        .rate-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .booking-timeline {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-top: -100px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            background: #e9ecef;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 15px;
+            font-weight: bold;
+            color: #6c757d;
+            position: relative;
+        }
+
+        .step.completed {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .step.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background: #e9ecef;
+            right: -22px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .amenity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .amenity-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .amenity-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-breakdown {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .lease-terms {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .booking-step {
+            display: none;
+        }
+
+        .booking-step.active {
+            display: block;
+        }
+
+        .duration-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .duration-card {
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .duration-card:hover,
+        .duration-card.selected {
+            border-color: var(--primary-color);
+            background: rgba(111, 66, 193, 0.05);
+            transform: translateY(-3px);
+        }
+
+        .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: bold;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary-color);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .extended-stay-badge {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .calendar-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                height: 50vh;
+            }
+
+            .booking-timeline {
+                margin-top: -50px;
+                padding: 1.5rem;
+            }
+
+            .duration-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="customer-dashboard.html">
+                <i class="fas fa-building me-2"></i>Real Nest Residential Suites
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="customer-dashboard.html">
+                            <i class="fas fa-home me-1"></i>Hotel Rooms
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#suites">Residential Suites</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="guest-portal.html">
+                            <i class="fas fa-user me-1"></i>My Bookings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="display-4 mb-4">Residential Suites</h1>
+                    <p class="lead mb-4">Extended stay accommodations for a week, month, or longer. Perfect for business
+                        travelers, relocations, and temporary housing needs.</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button class="btn btn-primary-custom btn-lg" onclick="startBookingProcess()">
+                            <i class="fas fa-calendar-plus me-2"></i>Book Extended Stay
+                        </button>
+                        <button class="btn btn-outline-light btn-lg" onclick="scrollToSuites()">
+                            <i class="fas fa-eye me-2"></i>View Suites
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="text-center">
+                        <div class="bg-white bg-opacity-10 rounded p-4">
+                            <h5>Starting From</h5>
+                            <h2 class="text-accent">$1,200<small>/week</small></h2>
+                            <p class="mb-0">All utilities included</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Timeline -->
+    <div class="container">
+        <div class="booking-timeline">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active" id="step1">1</div>
+                <div class="step" id="step2">2</div>
+                <div class="step" id="step3">3</div>
+                <div class="step" id="step4">4</div>
+            </div>
+
+            <!-- Step 1: Duration & Dates Selection -->
+            <div id="durationStep" class="booking-step active">
+                <h4 class="text-center mb-4">Choose Your Stay Duration</h4>
+
+                <div class="duration-selector">
+                    <div class="duration-card" data-duration="weekly" onclick="selectDuration('weekly')">
+                        <i class="fas fa-calendar-week fa-3x text-primary mb-3"></i>
+                        <h5>Weekly Stay</h5>
+                        <p class="text-muted">7-27 days</p>
+                        <div class="fw-bold text-primary">From $1,200/week</div>
+                        <small class="text-muted">Minimum 1 week</small>
+                    </div>
+
+                    <div class="duration-card" data-duration="monthly" onclick="selectDuration('monthly')">
+                        <i class="fas fa-calendar-alt fa-3x text-primary mb-3"></i>
+                        <h5>Monthly Stay</h5>
+                        <p class="text-muted">28+ days</p>
+                        <div class="fw-bold text-primary">From $4,500/month</div>
+                        <small class="text-muted">Significant savings</small>
+                    </div>
+
+                    <div class="duration-card" data-duration="extended" onclick="selectDuration('extended')">
+                        <i class="fas fa-calendar fa-3x text-primary mb-3"></i>
+                        <h5>Extended Stay</h5>
+                        <p class="text-muted">3+ months</p>
+                        <div class="fw-bold text-primary">From $4,000/month</div>
+                        <small class="text-muted">Best value</small>
+                    </div>
+                </div>
+
+                <div id="dateSelection" style="display: none;">
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Move-in Date</label>
+                            <input type="date" class="form-control" id="moveInDate" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Initial Duration</label>
+                            <select class="form-select" id="initialDuration">
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Move-out Date</label>
+                            <input type="date" class="form-control" id="moveOutDate" readonly>
+                        </div>
+                    </div>
+
+                    <div class="calendar-notice">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Flexible Terms:</strong> You can extend your stay at any time. Weekly rates apply for
+                        stays under 28 days, monthly rates for longer periods.
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary-custom" onclick="goToStep(2)">
+                            Continue to Suites <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Suite Selection -->
+            <div id="suiteStep" class="booking-step">
+                <h4 class="text-center mb-4">Choose Your Residential Suite</h4>
+
+                <div id="suitesContainer" class="row">
+                    <!-- Suites will be populated here -->
+                </div>
+            </div>
+
+            <!-- Step 3: Resident Information -->
+            <div id="residentStep" class="booking-step">
+                <h4 class="text-center mb-4">Resident Information</h4>
+
+                <form id="residentForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Primary Resident Name *</label>
+                            <input type="text" class="form-control" id="primaryResident" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="residentEmail" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" id="residentPhone" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Emergency Contact</label>
+                            <input type="text" class="form-control" id="emergencyContact">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Current Address</label>
+                            <input type="text" class="form-control" id="currentAddress" placeholder="Street Address">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-control" id="residentCity">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">State/Province</label>
+                            <input type="text" class="form-control" id="residentState">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Country</label>
+                            <select class="form-select" id="residentCountry">
+                                <option value="">Select Country</option>
+                                <option value="US">United States</option>
+                                <option value="LK">Sri Lanka</option>
+                                <option value="IN">India</option>
+                                <option value="GB">United Kingdom</option>
+                                <option value="AU">Australia</option>
+                                <option value="CA">Canada</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Number of Residents</label>
+                            <select class="form-select" id="numberOfResidents">
+                                <option value="1" selected>1 Person</option>
+                                <option value="2">2 People</option>
+                                <option value="3">3 People</option>
+                                <option value="4">4 People</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Purpose of Stay</label>
+                            <select class="form-select" id="purposeOfStay">
+                                <option value="business">Business/Work</option>
+                                <option value="relocation">Relocation</option>
+                                <option value="temporary">Temporary Housing</option>
+                                <option value="medical">Medical Treatment</option>
+                                <option value="education">Education/Training</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Special Requirements</label>
+                            <textarea class="form-control" id="specialRequirements" rows="3"
+                                placeholder="Accessibility needs, pets, parking, etc."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="lease-terms">
+                        <h6><i class="fas fa-file-contract me-2"></i>Lease Terms & Conditions</h6>
+                        <ul class="mb-3">
+                            <li>Security deposit: One month's rent (refundable)</li>
+                            <li>Utilities included: Electricity, water, internet, cable TV</li>
+                            <li>Housekeeping: Weekly service included</li>
+                            <li>Minimum stay: 7 days for weekly, 28 days for monthly rates</li>
+                            <li>Extension policy: 30-day notice for extensions</li>
+                            <li>Cancellation: 14-day notice required</li>
+                        </ul>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="agreeToTerms" required>
+                            <label class="form-check-label" for="agreeToTerms">
+                                I agree to the <a href="#" class="text-decoration-none">Residential Lease Terms and
+                                    Conditions</a>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-secondary me-2" onclick="goToStep(2)">
+                            <i class="fas fa-arrow-left me-2"></i>Back
+                        </button>
+                        <button type="submit" class="btn btn-primary-custom">
+                            Continue to Payment <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 4: Payment & Lease Agreement -->
+            <div id="paymentStep" class="booking-step">
+                <h4 class="text-center mb-4">Payment & Lease Confirmation</h4>
+
+                <!-- Booking Summary -->
+                <div class="pricing-breakdown mb-4">
+                    <h5><i class="fas fa-receipt me-2"></i>Booking Summary</h5>
+                    <div id="finalBookingSummary">
+                        <!-- Summary will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Payment Schedule -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6><i class="fas fa-calendar-dollar me-2"></i>Payment Schedule</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Due Today</h6>
+                                <div class="mb-2">
+                                    <span>Security Deposit:</span>
+                                    <span class="float-end" id="securityDeposit">$4,500.00</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span>First Period:</span>
+                                    <span class="float-end" id="firstPeriodAmount">$4,500.00</span>
+                                </div>
+                                <hr>
+                                <div class="fw-bold">
+                                    <span>Total Due Today:</span>
+                                    <span class="float-end" id="totalDueToday">$9,000.00</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Ongoing Payments</h6>
+                                <div class="mb-2">
+                                    <span>Recurring Amount:</span>
+                                    <span class="float-end" id="recurringAmount">$4,500.00/month</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span>Payment Due:</span>
+                                    <span class="float-end">1st of each month</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span>Auto-Pay:</span>
+                                    <span class="float-end">Available</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6><i class="fas fa-credit-card me-2"></i>Payment Method</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="payCard"
+                                        value="card" checked>
+                                    <label class="form-check-label" for="payCard">
+                                        <i class="fas fa-credit-card me-2"></i>Credit/Debit Card
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="payBank"
+                                        value="bank">
+                                    <label class="form-check-label" for="payBank">
+                                        <i class="fas fa-university me-2"></i>Bank Transfer (ACH)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Credit Card Form -->
+                        <div id="cardPaymentForm" class="mt-3">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label">Cardholder Name</label>
+                                    <input type="text" class="form-control" id="leaseCardholderName" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Card Number</label>
+                                    <input type="text" class="form-control" id="leaseCardNumber"
+                                        placeholder="1234 5678 9012 3456" maxlength="19" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Expiry Date</label>
+                                    <input type="text" class="form-control" id="leaseExpiryDate" placeholder="MM/YY"
+                                        maxlength="5" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="leaseCvv" placeholder="123"
+                                        maxlength="3" required>
+                                </div>
+                            </div>
+
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" id="enableAutoPay">
+                                <label class="form-check-label" for="enableAutoPay">
+                                    Set up automatic payments for future months
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="button" class="btn btn-secondary me-2" onclick="goToStep(3)">
+                        <i class="fas fa-arrow-left me-2"></i>Back
+                    </button>
+                    <button type="button" class="btn btn-primary-custom btn-lg" onclick="processResidentialBooking()">
+                        <i class="fas fa-home me-2"></i>Confirm Lease Agreement
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suites Showcase -->
+    <section id="suites" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Available Residential Suites</h2>
+
+            <!-- Suites will be populated by JavaScript -->
+            <div id="suitesShowcase" class="row">
+                <!-- Suite cards will be inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Suite Details Template -->
+    <template id="suiteTemplate">
+        <div class="col-lg-6 mb-4">
+            <div class="suite-card">
+                <div class="position-relative">
+                    <img src="" class="suite-image" alt="Residential Suite">
+                    <div class="rate-badge">
+                        <span class="suite-rate"></span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <h4 class="card-title suite-title"></h4>
+                    <p class="card-text text-muted suite-description"></p>
+
+                    <div class="amenity-grid">
+                        <!-- Amenities will be populated here -->
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted suite-specs"></small>
+                        </div>
+                        <button class="btn btn-primary-custom select-suite-btn" data-suite-id="">
+                            Select Suite
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let currentStep = 1;
+        let selectedDuration = '';
+        let selectedSuite = null;
+        let bookingData = {};
+
+        // Residential suite data
+        const residentialSuites = [
+            {
+                id: 'studio-deluxe',
+                name: 'Deluxe Studio Suite',
+                weeklyRate: 1200,
+                monthlyRate: 4500,
+                extendedRate: 4000,
+                image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&w=800',
+                description: 'Modern studio with kitchenette, perfect for solo professionals',
+                specs: '500 sq ft • 1 Bath • Kitchenette',
+                amenities: ['Full Kitchen', 'Work Desk', 'WiFi', 'Laundry', 'Parking']
+            },
+            {
+                id: 'one-bedroom',
+                name: 'One Bedroom Residence',
+                weeklyRate: 1800,
+                monthlyRate: 6500,
+                extendedRate: 5800,
+                image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&w=800',
+                description: 'Spacious one-bedroom with separate living area and full kitchen',
+                specs: '750 sq ft • 1 Bedroom • 1 Bath • Full Kitchen',
+                amenities: ['Full Kitchen', 'Living Room', 'Work Desk', 'WiFi', 'Laundry', 'Parking', 'Balcony']
+            },
+            {
+                id: 'two-bedroom',
+                name: 'Two Bedroom Family Suite',
+                weeklyRate: 2500,
+                monthlyRate: 9000,
+                extendedRate: 8000,
+                image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&w=800',
+                description: 'Perfect for families or colleagues sharing accommodation',
+                specs: '1200 sq ft • 2 Bedrooms • 2 Baths • Full Kitchen',
+                amenities: ['Full Kitchen', 'Living Room', 'Dining Area', 'Work Desks', 'WiFi', 'Laundry', 'Parking', 'Balcony']
+            },
+            {
+                id: 'executive-penthouse',
+                name: 'Executive Penthouse',
+                weeklyRate: 4000,
+                monthlyRate: 14000,
+                extendedRate: 12000,
+                image: 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?ixlib=rb-4.0.3&w=800',
+                description: 'Luxury penthouse with panoramic views and premium amenities',
+                specs: '2000 sq ft • 3 Bedrooms • 3 Baths • Gourmet Kitchen',
+                amenities: ['Gourmet Kitchen', 'Living Room', 'Dining Room', 'Office', 'WiFi', 'Laundry', 'Parking', 'Terrace', 'Concierge']
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeResidentialBooking();
+            loadSuitesShowcase();
+            setupEventListeners();
+        });
+
+        function initializeResidentialBooking() {
+            // Set minimum move-in date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('moveInDate').min = tomorrow.toISOString().split('T')[0];
+
+            // Setup card formatting
+            setupCardFormatting();
+        }
+
+        function selectDuration(duration) {
+            selectedDuration = duration;
+
+            // Update UI
+            document.querySelectorAll('.duration-card').forEach(card => card.classList.remove('selected'));
+            document.querySelector(`[data-duration="${duration}"]`).classList.add('selected');
+
+            // Show date selection
+            document.getElementById('dateSelection').style.display = 'block';
+
+            // Populate duration options
+            populateDurationOptions(duration);
+
+            // Scroll to date selection
+            document.getElementById('dateSelection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function populateDurationOptions(durationType) {
+            const select = document.getElementById('initialDuration');
+            select.innerHTML = '';
+
+            if (durationType === 'weekly') {
+                for (let i = 1; i <= 4; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `${i} Week${i > 1 ? 's' : ''}`;
+                    select.appendChild(option);
+                }
+            } else if (durationType === 'monthly') {
+                for (let i = 1; i <= 12; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `${i} Month${i > 1 ? 's' : ''}`;
+                    select.appendChild(option);
+                }
+            } else if (durationType === 'extended') {
+                for (let i = 3; i <= 24; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `${i} Months`;
+                    select.appendChild(option);
+                }
+            }
+
+            // Update move-out date when duration changes
+            select.addEventListener('change', updateMoveOutDate);
+            updateMoveOutDate(); // Initial calculation
+        }
+
+        function updateMoveOutDate() {
+            const moveInDate = document.getElementById('moveInDate').value;
+            const duration = parseInt(document.getElementById('initialDuration').value);
+
+            if (moveInDate && duration) {
+                const moveIn = new Date(moveInDate);
+                let moveOut;
+
+                if (selectedDuration === 'weekly') {
+                    moveOut = new Date(moveIn);
+                    moveOut.setDate(moveOut.getDate() + (duration * 7));
+                } else {
+                    moveOut = new Date(moveIn);
+                    moveOut.setMonth(moveOut.getMonth() + duration);
+                }
+
+                document.getElementById('moveOutDate').value = moveOut.toISOString().split('T')[0];
+            }
+        }
+
+        function goToStep(step) {
+            // Update step indicators
+            document.querySelectorAll('.step').forEach((el, index) => {
+                el.classList.remove('active', 'completed');
+                if (index + 1 < step) el.classList.add('completed');
+                else if (index + 1 === step) el.classList.add('active');
+            });
+
+            // Hide all steps
+            document.querySelectorAll('.booking-step').forEach(el => el.classList.remove('active'));
+
+            // Show current step
+            const stepNames = ['', 'durationStep', 'suiteStep', 'residentStep', 'paymentStep'];
+            document.getElementById(stepNames[step]).classList.add('active');
+
+            if (step === 2) {
+                loadAvailableSuites();
+            } else if (step === 4) {
+                generateBookingSummary();
+            }
+
+            currentStep = step;
+        }
+
+        function loadSuitesShowcase() {
+            const container = document.getElementById('suitesShowcase');
+            container.innerHTML = '';
+
+            residentialSuites.forEach(suite => {
+                const suiteCard = createSuiteCard(suite, true);
+                container.appendChild(suiteCard);
+            });
+        }
+
+        function loadAvailableSuites() {
+            const container = document.getElementById('suitesContainer');
+            container.innerHTML = '';
+
+            residentialSuites.forEach(suite => {
+                const suiteCard = createSuiteCard(suite, false);
+                container.appendChild(suiteCard);
+            });
+        }
+
+        function createSuiteCard(suite, isShowcase) {
+            const template = document.getElementById('suiteTemplate');
+            const clone = template.content.cloneNode(true);
+
+            // Populate suite data
+            clone.querySelector('.suite-image').src = suite.image;
+            clone.querySelector('.suite-title').textContent = suite.name;
+            clone.querySelector('.suite-description').textContent = suite.description;
+            clone.querySelector('.suite-specs').textContent = suite.specs;
+
+            // Populate rate based on selected duration
+            let rate, rateText;
+            if (selectedDuration === 'weekly') {
+                rate = suite.weeklyRate;
+                rateText = `$${rate}/week`;
+            } else if (selectedDuration === 'monthly') {
+                rate = suite.monthlyRate;
+                rateText = `$${rate}/month`;
+            } else {
+                rate = suite.extendedRate;
+                rateText = `$${rate}/month`;
+            }
+
+            clone.querySelector('.suite-rate').textContent = rateText;
+
+            // Populate amenities
+            const amenityGrid = clone.querySelector('.amenity-grid');
+            amenityGrid.innerHTML = '';
+            suite.amenities.forEach(amenity => {
+                const amenityItem = document.createElement('div');
+                amenityItem.className = 'amenity-item';
+                amenityItem.innerHTML = `
+                    <i class="fas fa-check amenity-icon"></i>
+                    <div>${amenity}</div>
+                `;
+                amenityGrid.appendChild(amenityItem);
+            });
+
+            // Setup select button
+            const selectBtn = clone.querySelector('.select-suite-btn');
+            selectBtn.dataset.suiteId = suite.id;
+
+            if (isShowcase) {
+                selectBtn.textContent = 'Book This Suite';
+                selectBtn.onclick = () => startBookingProcess(suite.id);
+            } else {
+                selectBtn.onclick = () => selectSuite(suite);
+            }
+
+            return clone;
+        }
+
+        function selectSuite(suite) {
+            selectedSuite = suite;
+
+            // Update UI to show selection
+            document.querySelectorAll('.select-suite-btn').forEach(btn => {
+                btn.textContent = 'Select Suite';
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-primary-custom');
+            });
+
+            event.target.textContent = 'Selected';
+            event.target.classList.remove('btn-primary-custom');
+            event.target.classList.add('btn-success');
+
+            // Show continue button
+            setTimeout(() => {
+                Swal.fire({
+                    title: 'Suite Selected!',
+                    text: `${suite.name} has been selected for your residential stay.`,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                setTimeout(() => goToStep(3), 1500);
+            }, 500);
+        }
+
+        function setupEventListeners() {
+            // Move-in date change
+            document.getElementById('moveInDate').addEventListener('change', updateMoveOutDate);
+
+            // Resident form submission
+            document.getElementById('residentForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                goToStep(4);
+            });
+
+            // Payment method toggle
+            document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    const cardForm = document.getElementById('cardPaymentForm');
+                    cardForm.style.display = this.value === 'card' ? 'block' : 'none';
+                });
+            });
+        }
+
+        function setupCardFormatting() {
+            // Card number formatting
+            document.getElementById('leaseCardNumber').addEventListener('input', function () {
+                let value = this.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                this.value = formattedValue;
+            });
+
+            // Expiry date formatting
+            document.getElementById('leaseExpiryDate').addEventListener('input', function () {
+                let value = this.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                this.value = value;
+            });
+
+            // CVV validation
+            document.getElementById('leaseCvv').addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '');
+            });
+        }
+
+        function generateBookingSummary() {
+            if (!selectedSuite) return;
+
+            const moveInDate = document.getElementById('moveInDate').value;
+            const duration = parseInt(document.getElementById('initialDuration').value);
+            const numberOfResidents = parseInt(document.getElementById('numberOfResidents').value);
+
+            let rate, period, totalAmount;
+            if (selectedDuration === 'weekly') {
+                rate = selectedSuite.weeklyRate;
+                period = 'week';
+                totalAmount = rate * duration;
+            } else {
+                rate = selectedDuration === 'monthly' ? selectedSuite.monthlyRate : selectedSuite.extendedRate;
+                period = 'month';
+                totalAmount = rate * duration;
+            }
+
+            const securityDeposit = rate; // One period as security deposit
+            const totalDueToday = totalAmount + securityDeposit;
+
+            // Update summary
+            const summaryContainer = document.getElementById('finalBookingSummary');
+            summaryContainer.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Suite:</strong> ${selectedSuite.name}</p>
+                        <p><strong>Move-in:</strong> ${new Date(moveInDate).toLocaleDateString()}</p>
+                        <p><strong>Duration:</strong> ${duration} ${period}${duration > 1 ? 's' : ''}</p>
+                        <p><strong>Residents:</strong> ${numberOfResidents}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Rate:</strong> $${rate}/${period}</p>
+                        <p><strong>Total Rent:</strong> $${totalAmount.toLocaleString()}</p>
+                        <p><strong>Security Deposit:</strong> $${securityDeposit.toLocaleString()}</p>
+                        <hr>
+                        <p><strong>Total Due Today:</strong> <span class="text-success">$${totalDueToday.toLocaleString()}</span></p>
+                    </div>
+                </div>
+            `;
+
+            // Update payment schedule
+            document.getElementById('securityDeposit').textContent = `$${securityDeposit.toLocaleString()}.00`;
+            document.getElementById('firstPeriodAmount').textContent = `$${rate.toLocaleString()}.00`;
+            document.getElementById('totalDueToday').textContent = `$${totalDueToday.toLocaleString()}.00`;
+            document.getElementById('recurringAmount').textContent = `$${rate.toLocaleString()}.00/${period}`;
+        }
+
+        function processResidentialBooking() {
+            // Validate required fields
+            if (!selectedSuite || !document.getElementById('agreeToTerms').checked) {
+                Swal.fire('Error', 'Please complete all required fields and agree to the terms', 'error');
+                return;
+            }
+
+            // Collect booking data
+            bookingData = {
+                type: 'residential',
+                suite: selectedSuite,
+                duration: selectedDuration,
+                moveInDate: document.getElementById('moveInDate').value,
+                moveOutDate: document.getElementById('moveOutDate').value,
+                initialDuration: parseInt(document.getElementById('initialDuration').value),
+                resident: {
+                    name: document.getElementById('primaryResident').value,
+                    email: document.getElementById('residentEmail').value,
+                    phone: document.getElementById('residentPhone').value,
+                    emergencyContact: document.getElementById('emergencyContact').value,
+                    address: document.getElementById('currentAddress').value,
+                    city: document.getElementById('residentCity').value,
+                    state: document.getElementById('residentState').value,
+                    country: document.getElementById('residentCountry').value,
+                    numberOfResidents: parseInt(document.getElementById('numberOfResidents').value),
+                    purposeOfStay: document.getElementById('purposeOfStay').value,
+                    specialRequirements: document.getElementById('specialRequirements').value
+                },
+                payment: {
+                    method: document.querySelector('input[name="paymentMethod"]:checked').value,
+                    autoPayEnabled: document.getElementById('enableAutoPay').checked
+                }
+            };
+
+            if (bookingData.payment.method === 'card') {
+                bookingData.payment.card = {
+                    holderName: document.getElementById('leaseCardholderName').value,
+                    number: document.getElementById('leaseCardNumber').value,
+                    expiry: document.getElementById('leaseExpiryDate').value,
+                    cvv: document.getElementById('leaseCvv').value
+                };
+            }
+
+            // Show processing
+            Swal.fire({
+                title: 'Processing Lease Agreement...',
+                text: 'Please wait while we process your residential booking',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            // Simulate processing
+            setTimeout(() => {
+                completeResidentialBooking();
+            }, 3000);
+        }
+
+        function completeResidentialBooking() {
+            const leaseRef = 'RSL' + Date.now().toString().slice(-6);
+
+            Swal.fire({
+                title: 'Lease Agreement Confirmed!',
+                html: `
+                    <div class="text-center">
+                        <i class="fas fa-home text-success fa-4x mb-3"></i>
+                        <h4>Welcome to Your New Home!</h4>
+                        <p><strong>Lease Reference:</strong> ${leaseRef}</p>
+                        <p>Your residential suite has been reserved. You will receive:</p>
+                        <ul class="text-start mt-3">
+                            <li>Lease agreement via email within 24 hours</li>
+                            <li>Move-in instructions and key collection details</li>
+                            <li>Welcome packet with building amenities</li>
+                            <li>Contact information for resident services</li>
+                        </ul>
+                        <div class="mt-4">
+                            <button class="btn btn-primary me-2" onclick="window.location.href='guest-portal.html'">
+                                View My Lease
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="downloadLeaseDocument()">
+                                Download Receipt
+                            </button>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                width: '600px'
+            });
+
+            // Save to localStorage for demo
+            saveResidentialBooking(leaseRef);
+        }
+
+        function saveResidentialBooking(leaseRef) {
+            const bookings = JSON.parse(localStorage.getItem('customerBookings') || '[]');
+            bookings.push({
+                ...bookingData,
+                reference: leaseRef,
+                status: 'Confirmed',
+                bookingDate: new Date().toISOString(),
+                type: 'residential'
+            });
+            localStorage.setItem('customerBookings', JSON.stringify(bookings));
+        }
+
+        function downloadLeaseDocument() {
+            Swal.fire({
+                title: 'Lease Document Downloaded',
+                text: 'Your lease agreement has been downloaded.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        function startBookingProcess(suiteId) {
+            if (suiteId) {
+                selectedSuite = residentialSuites.find(s => s.id === suiteId);
+            }
+            document.querySelector('.booking-timeline').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToSuites() {
+            document.getElementById('suites').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>

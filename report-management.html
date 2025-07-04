@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .form-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .btn-group-custom {
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 400px;
+        }
+
+        /* Stats cards */
+        .stats-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-card {
+            min-height: 120px;
+            border-radius: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Page header */
+        .page-header {
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Navigation tabs styling */
+        .nav-tabs-custom {
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-tabs-custom .nav-link {
+            border: none;
+            background: none;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            margin-bottom: -2px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs-custom .nav-link:hover {
+            color: #007bff;
+            border-bottom-color: #007bff;
+            background: none;
+        }
+
+        .nav-tabs-custom .nav-link.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+            background: none;
+        }
+
+        /* Chart containers */
+        .chart-container {
+            height: 350px;
+        }
+
+        /* KPI cards for performance */
+        .kpi-card {
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            color: white;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            transition: transform 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .kpi-card h6 {
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .kpi-card h4 {
+            margin-bottom: 0.25rem;
+            font-weight: bold;
+        }
+
+        .kpi-card small {
+            opacity: 0.8;
+        }
+
+        /* Performance gauge */
+        .gauge-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        /* Responsive behavior */
+        @media (max-width: 768px) {
+            .stats-container .col-md-3 {
+                margin-bottom: 1rem;
+            }
+
+            .header-buttons {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+
+            .header-buttons .btn {
+                margin-bottom: 0.5rem;
+            }
+
+            .form-container {
+                padding: 1rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .page-header h3 {
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+
+            .kpi-card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Smooth transitions */
+        .fade-transition {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="d-flex page-header">
+            <h3 class="mb-0 flex-grow-1">
+                <i class="fas fa-chart-bar me-2 text-primary"></i>
+                Reports & Analytics
+            </h3>
+            <div class="header-buttons">
+                <button class="btn btn-success" onclick="exportReport('pdf')">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
+                <button class="btn btn-info" onclick="exportReport('excel')">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+                <button class="btn btn-warning" onclick="scheduleReport()">
+                    <i class="fas fa-clock"></i> Schedule Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs nav-tabs-custom" id="reportTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="occupancy-tab" data-bs-toggle="tab" data-bs-target="#occupancy"
+                    type="button">
+                    <i class="fas fa-bed me-2"></i>Occupancy Reports
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="revenue-tab" data-bs-toggle="tab" data-bs-target="#revenue" type="button">
+                    <i class="fas fa-dollar-sign me-2"></i>Revenue Reports
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="forecast-tab" data-bs-toggle="tab" data-bs-target="#forecast"
+                    type="button">
+                    <i class="fas fa-chart-line me-2"></i>Forecasting
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance"
+                    type="button">
+                    <i class="fas fa-tachometer-alt me-2"></i>Performance
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="reportTabContent">
+            <!-- Occupancy Reports Tab -->
+            <div class="tab-pane fade show active" id="occupancy" role="tabpanel">
+                <!-- Occupancy Summary Cards -->
+                <div class="stats-container">
+                    <div class="row g-3">
+                        <!-- Total Rooms -->
+                        <div class="col-lg-3 col-md-4">
+                            <div class="card bg-primary text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-bed fa-2x mb-2"></i>
+                                    <h5>Total Rooms</h5>
+                                    <h3 id="totalRooms">0</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Average Occupancy -->
+                        <div class="col-lg-3 col-md-4">
+                            <div class="card bg-success text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-percentage fa-2x mb-2"></i>
+                                    <h5>Average Occupancy</h5>
+                                    <h3 id="occupancyPercentage">0%</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Daily Check-Ins -->
+                        <div class="col-lg-3 col-md-4">
+                            <div class="card bg-info text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-sign-in-alt fa-2x mb-2"></i>
+                                    <h5>Daily Check-Ins</h5>
+                                    <h3 id="checkedInCount">0</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- No-Shows -->
+                        <div class="col-lg-3 col-md-4">
+                            <div class="card bg-danger text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-user-times fa-2x mb-2"></i>
+                                    <h5>No-Shows</h5>
+                                    <h3 id="noShowBilling">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Filters -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">From Date</label>
+                                <input type="date" class="form-control" id="occupancyFromDate">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">To Date</label>
+                                <input type="date" class="form-control" id="occupancyToDate">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Room Type</label>
+                                <select class="form-select" id="occupancyRoomType">
+                                    <option value="all">All Room Types</option>
+                                    <option value="standard">Standard</option>
+                                    <option value="deluxe">Deluxe</option>
+                                    <option value="suite">Suite</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100" onclick="generateOccupancyReport()">
+                                    <i class="fas fa-search"></i> Generate Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts and Tables -->
+                <div class="row g-4">
+                    <!-- Occupancy Chart -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Daily Occupancy Trend</h5>
+                            </div>
+                            <div class="card-body chart-container">
+                                <canvas id="occupancyTrendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Room Type Breakdown -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Occupancy by Room Type</h5>
+                            </div>
+                            <div class="card-body chart-container">
+                                <canvas id="roomTypeOccupancyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Occupancy Table -->
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Total Rooms</th>
+                                        <th>Occupied</th>
+                                        <th>Occupancy %</th>
+                                        <th>Standard</th>
+                                        <th>Deluxe</th>
+                                        <th>Suite</th>
+                                        <th>No-Shows</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="occupancyTableBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Reports Tab -->
+            <div class="tab-pane fade" id="revenue" role="tabpanel">
+                <!-- Revenue Summary Cards -->
+                <div class="stats-container">
+                    <div class="row g-3">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card bg-success text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                                    <h5>Total Revenue</h5>
+                                    <h3 id="totalRevenue">$124,580</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card bg-primary text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-bed fa-2x mb-2"></i>
+                                    <h5>Room Revenue</h5>
+                                    <h3 id="roomRevenue">$98,650</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card bg-info text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-utensils fa-2x mb-2"></i>
+                                    <h5>F&B Revenue</h5>
+                                    <h3 id="fbRevenue">$18,450</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card bg-warning text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-plus fa-2x mb-2"></i>
+                                    <h5>Other Revenue</h5>
+                                    <h3 id="otherRevenue">$7,480</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Filters -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">Period</label>
+                                <select class="form-select" id="revenuePeriod">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly" selected>Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Revenue Type</label>
+                                <select class="form-select" id="revenueType">
+                                    <option value="all">All Revenue</option>
+                                    <option value="rooms">Room Revenue</option>
+                                    <option value="fb">F&B Revenue</option>
+                                    <option value="other">Other Revenue</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Compare With</label>
+                                <select class="form-select" id="revenueCompare">
+                                    <option value="none">No Comparison</option>
+                                    <option value="previous">Previous Period</option>
+                                    <option value="last_year">Same Period Last Year</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100" onclick="generateRevenueReport()">
+                                    <i class="fas fa-chart-bar"></i> Generate Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Charts -->
+                <div class="row g-4">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Revenue Trend</h5>
+                            </div>
+                            <div class="card-body chart-container">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Revenue Breakdown</h5>
+                            </div>
+                            <div class="card-body chart-container">
+                                <canvas id="revenueBreakdownChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RevPAR Analysis -->
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">RevPAR (Revenue Per Available Room) Analysis</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h4 class="text-success">$155.75</h4>
+                                            <p class="mb-0">Current RevPAR</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h4 class="text-info">$148.20</h4>
+                                            <p class="mb-0">Previous Month</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h4 class="text-warning">+5.1%</h4>
+                                            <p class="mb-0">Growth</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forecasting Tab -->
+            <div class="tab-pane fade" id="forecast" role="tabpanel">
+                <!-- Forecast Stats -->
+                <div class="stats-container">
+                    <div class="row g-3">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card bg-primary text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-chart-line fa-2x mb-2"></i>
+                                    <h5>Forecast Accuracy</h5>
+                                    <h3>94.2%</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card bg-success text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-arrow-up fa-2x mb-2"></i>
+                                    <h5>Predicted Growth</h5>
+                                    <h3>+8.5%</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card bg-info text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-calendar fa-2x mb-2"></i>
+                                    <h5>Peak Season</h5>
+                                    <h3>Jul-Aug</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card bg-warning text-white stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-brain fa-2x mb-2"></i>
+                                    <h5>AI Confidence</h5>
+                                    <h3>High</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forecast Controls -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">Forecast Period</label>
+                                <select class="form-select" id="forecastPeriod">
+                                    <option value="30">Next 30 Days</option>
+                                    <option value="60">Next 60 Days</option>
+                                    <option value="90">Next 90 Days</option>
+                                    <option value="365">Next Year</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Forecast Type</label>
+                                <select class="form-select" id="forecastType">
+                                    <option value="occupancy">Occupancy</option>
+                                    <option value="revenue">Revenue</option>
+                                    <option value="both">Both</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Algorithm</label>
+                                <select class="form-select" id="forecastAlgorithm">
+                                    <option value="linear">Linear Trend</option>
+                                    <option value="seasonal">Seasonal Pattern</option>
+                                    <option value="advanced">Machine Learning</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100" onclick="generateForecast()">
+                                    <i class="fas fa-chart-line"></i> Generate Forecast
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forecast Chart and Insights -->
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Occupancy & Revenue Forecast</h5>
+                            </div>
+                            <div class="card-body chart-container">
+                                <canvas id="forecastChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Insights -->
+                    <div class="col-md-6">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Key Insights</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled" id="forecastInsights">
+                                    <li class="mb-2"><i class="fas fa-arrow-up text-success"></i> Peak season expected
+                                        in July-August</li>
+                                    <li class="mb-2"><i class="fas fa-arrow-down text-warning"></i> Lower occupancy
+                                        predicted for September</li>
+                                    <li class="mb-2"><i class="fas fa-dollar-sign text-info"></i> Revenue growth of 8.5%
+                                        projected</li>
+                                    <li class="mb-2"><i class="fas fa-calendar text-primary"></i> Weekend bookings
+                                        trending upward</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="col-md-6">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Recommendations</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled" id="forecastRecommendations">
+                                    <li class="mb-2"><i class="fas fa-lightbulb text-warning"></i> Increase marketing
+                                        for September</li>
+                                    <li class="mb-2"><i class="fas fa-tags text-success"></i> Consider dynamic pricing
+                                        for peak season</li>
+                                    <li class="mb-2"><i class="fas fa-users text-info"></i> Staff up for high-demand
+                                        periods</li>
+                                    <li class="mb-2"><i class="fas fa-tools text-primary"></i> Schedule maintenance
+                                        during low season</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Tab -->
+            <div class="tab-pane fade" id="performance" role="tabpanel">
+                <!-- KPI Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-lg-2 col-md-4">
+                        <div class="kpi-card" style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);">
+                            <h6>ADR</h6>
+                            <h4>$185.50</h4>
+                            <small>+3.2%</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <div class="kpi-card" style="background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);">
+                            <h6>RevPAR</h6>
+                            <h4>$139.25</h4>
+                            <small>+5.1%</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <div class="kpi-card" style="background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);">
+                            <h6>GOPPAR</h6>
+                            <h4>$95.80</h4>
+                            <small>+4.8%</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <div class="kpi-card" style="background: linear-gradient(45deg, #43e97b 0%, #38f9d7 100%);">
+                            <h6>Guest Satisfaction</h6>
+                            <h4>4.6/5</h4>
+                            <small>+0.2</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <div class="kpi-card" style="background: linear-gradient(45deg, #fa709a 0%, #fee140 100%);">
+                            <h6>Staff Efficiency</h6>
+                            <h4>87%</h4>
+                            <small>+2.1%</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <div class="kpi-card"
+                            style="background: linear-gradient(45deg, #a8edea 0%, #fed6e3 100%); color: #333 !important;">
+                            <h6>Cost per Room</h6>
+                            <h4>$45.20</h4>
+                            <small>-1.8%</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Filters -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">Time Period</label>
+                                <select class="form-select" id="performancePeriod">
+                                    <option value="month">This Month</option>
+                                    <option value="quarter">This Quarter</option>
+                                    <option value="year">This Year</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Department</label>
+                                <select class="form-select" id="performanceDepartment">
+                                    <option value="all">All Departments</option>
+                                    <option value="rooms">Rooms</option>
+                                    <option value="fb">F&B</option>
+                                    <option value="spa">Spa & Wellness</option>
+                                    <option value="parking">Parking</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Comparison</label>
+                                <select class="form-select" id="performanceComparison">
+                                    <option value="industry">Industry Benchmark</option>
+                                    <option value="previous">Previous Period</option>
+                                    <option value="target">Target Goals</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100" onclick="generatePerformanceReport()">
+                                    <i class="fas fa-tachometer-alt"></i> Generate Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Charts -->
+                <div class="row g-4">
+                    <!-- Performance Comparison Chart -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Performance vs Industry Benchmark</h5>
+                            </div>
+                            <div class="card-body chart-container">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Score -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">Overall Performance Score</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="gauge-container">
+                                    <canvas id="performanceGauge" width="200" height="200"></canvas>
+                                    <div class="gauge-value">
+                                        <h2 class="text-success">8.5</h2>
+                                        <small>out of 10</small>
+                                    </div>
+                                </div>
+                                <p class="mt-3 text-muted">Excellent performance across all metrics</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Department Performance -->
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Department</th>
+                                        <th>Revenue</th>
+                                        <th>Target</th>
+                                        <th>Achievement %</th>
+                                        <th>Trend</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><i class="fas fa-bed text-primary"></i> Rooms</td>
+                                        <td>$98,650</td>
+                                        <td>$95,000</td>
+                                        <td>103.8%</td>
+                                        <td><i class="fas fa-arrow-up text-success"></i> +5.2%</td>
+                                        <td><span class="badge bg-success">Excellent</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fas fa-utensils text-warning"></i> F&B</td>
+                                        <td>$18,450</td>
+                                        <td>$20,000</td>
+                                        <td>92.3%</td>
+                                        <td><i class="fas fa-arrow-down text-warning"></i> -2.1%</td>
+                                        <td><span class="badge bg-warning">Needs Attention</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fas fa-spa text-info"></i> Spa & Wellness</td>
+                                        <td>$4,280</td>
+                                        <td>$4,000</td>
+                                        <td>107.0%</td>
+                                        <td><i class="fas fa-arrow-up text-success"></i> +8.5%</td>
+                                        <td><span class="badge bg-success">Excellent</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fas fa-car text-secondary"></i> Parking</td>
+                                        <td>$3,200</td>
+                                        <td>$3,500</td>
+                                        <td>91.4%</td>
+                                        <td><i class="fas fa-minus text-muted"></i> 0.0%</td>
+                                        <td><span class="badge bg-secondary">Average</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        async function loadOccupancyReport(startDate, endDate) {
+            try {
+                const response = await fetch(`http://localhost:8080/api/reports/summary?start=${startDate}&end=${endDate}`);
+                const data = await response.json();
+
+                // Update cards
+                document.getElementById('totalRooms').textContent = data.totalRooms;
+                document.getElementById('checkedInCount').textContent = data.checkedIn;
+                document.getElementById('noShowCount').textContent = data.noShow;
+                document.getElementById('occupancyPercentage').textContent = ((data.checkedIn / data.totalRooms) * 100).toFixed(1) + '%';
+
+
+                // Update table
+                const tbody = document.getElementById('occupancyTableBody');
+                tbody.innerHTML = `
+      <tr>
+        <td>${startDate} to ${endDate}</td>
+        <td>${data.totalRooms}</td>
+        <td>${data.checkedIn}</td>
+        <td>${data.noShow}</td>
+        <td>${((data.checkedIn / data.totalRooms) * 100).toFixed(1)}%</td>
+      </tr>
+    `;
+
+                // Update chart
+                const ctx = document.getElementById('occupancyTrendChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Checked-In', 'No Show'],
+                        datasets: [{
+                            label: 'Bookings',
+                            data: [data.checkedIn, data.noShow],
+                            backgroundColor: ['#00c851', '#ff4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: 'Occupancy Summary' }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading occupancy report:', error);
+            }
+        }
+
+        // Auto-load with default dates (today - 7 days)
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            const past7 = new Date();
+            past7.setDate(today.getDate() - 7);
+
+            const start = past7.toISOString().split('T')[0];
+            const end = today.toISOString().split('T')[0];
+
+            loadOccupancyReport(start, end);
+        });
+    </script>
+
+
+</body>
+
+</html>

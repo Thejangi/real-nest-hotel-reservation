@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .form-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            max-height: 80vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .btn-group-custom {
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 400px;
+        }
+
+        /* Stats cards */
+        .stats-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-card {
+            min-height: 120px;
+            border-radius: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Page header */
+        .page-header {
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Form sections */
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Customer activity indicators */
+        .activity-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .activity-indicator i {
+            color: #007bff;
+        }
+
+        /* Responsive behavior */
+        @media (max-width: 768px) {
+            .stats-container .col-md-3 {
+                margin-bottom: 1rem;
+            }
+
+            .header-buttons {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+
+            .header-buttons .btn {
+                margin-bottom: 0.5rem;
+            }
+
+            .form-container {
+                padding: 1rem;
+                max-height: 75vh;
+            }
+
+            .btn-group-custom {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-group-custom .d-flex {
+                justify-content: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .page-header h3 {
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Smooth transitions */
+        .fade-transition {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Table layout */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Customer type badge */
+        .customer-type-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="d-flex page-header">
+            <h3 class="mb-0 flex-grow-1">
+                <i class="fas fa-users me-2 text-primary"></i>
+                Customer Management
+            </h3>
+            <div class="header-buttons">
+                <button class="btn btn-primary" onclick="showAddCustomer()">
+                    <i class="fas fa-plus"></i> Add Customer
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-container" id="statsSection">
+            <div class="row g-3">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card bg-primary text-white stats-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <h5>Total Customers</h5>
+                            <h3 id="totalCustomers">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card bg-success text-white stats-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-male fa-2x mb-2"></i>
+                            <h5>Male</h5>
+                            <h3 id="maleCustomers">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card bg-info text-white stats-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-female fa-2x mb-2"></i>
+                            <h5>Female</h5>
+                            <h3 id="femaleCustomers">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card bg-warning text-white stats-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-globe fa-2x mb-2"></i>
+                            <h5>Nationalities</h5>
+                            <h3 id="uniqueNationalities">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card shadow-sm mb-4" id="filtersSection">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Gender</label>
+                        <select class="form-select" id="genderFilter" onchange="filterCustomers()">
+                            <option value="all">All Genders</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Nationality</label>
+                        <select class="form-select" id="nationalityFilter" onchange="filterCustomers()">
+                            <option value="all">All Nationalities</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Search</label>
+                        <input type="text" class="form-control" id="searchFilter"
+                            placeholder="Name, email, phone, ID number..." onkeyup="filterCustomers()">
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Table -->
+        <div id="customerTableWrapper" class="fade-transition fade-in">
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact Info</th>
+                                <th>Address</th>
+                                <th>ID Number</th>
+                                <th>Gender</th>
+                                <th>Nationality</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Form Section -->
+        <div id="customerFormWrapper" class="fade-transition" style="display:none;">
+            <form id="customerForm" class="form-container" onsubmit="return saveCustomerForm(event)">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0" id="customerFormTitle">
+                        <i class="fas fa-user-edit me-2"></i>
+                        Edit Customer
+                    </h5>
+                    <button type="button" class="btn btn-outline-secondary" onclick="hideCustomerForm()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <input type="hidden" id="customerIndex">
+
+                <div class="form-section">
+                    <h6 class="mb-3"><i class="fas fa-user me-2"></i>Personal Information</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Full Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="customerName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Email Address <span class="text-danger">*</span>
+                            </label>
+                            <input type="email" class="form-control" id="customerEmail" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Phone Number <span class="text-danger">*</span>
+                            </label>
+                            <input type="tel" class="form-control" id="customerPhone" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                ID Number <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="customerNIC" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h6 class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Address & Personal Details</h6>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">
+                                Address <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="customerAddress" rows="3" required
+                                placeholder="Street address, city, state/province, postal code"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Gender</label>
+                            <select class="form-select" id="customerGender">
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nationality</label>
+                            <input type="text" class="form-control" id="customerNationality"
+                                placeholder="e.g., Sri Lankan">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between flex-wrap btn-group-custom">
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button type="button" class="btn btn-danger" onclick="deleteCustomer()" id="deleteBtn">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                        <button type="button" class="btn btn-info" onclick="viewCustomerHistory()" id="historyBtn">
+                            <i class="fas fa-history"></i> Booking History
+                        </button>
+                    </div>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button type="button" class="btn btn-secondary" onclick="hideCustomerForm()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let customers = [];
+        let filteredCustomers = [];
+
+        // Authentication helper
+        function getAuthHeaders() {
+            const token = localStorage.getItem('jwtToken') || localStorage.getItem('jwt_token') || localStorage.getItem('token');
+            if (!token) {
+                console.warn('No JWT token found in localStorage');
+                return {
+                    'Content-Type': 'application/json'
+                };
+            }
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
+        // Load customers from API
+        function loadCustomers() {
+            console.log('Loading customers...');
+            fetch("http://localhost:8080/api/customers", {
+                method: 'GET',
+                headers: getAuthHeaders()
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Customers loaded:', data);
+                    customers = data.map(customer => ({
+                        id: customer.id,
+                        fullName: customer.fullName || customer.full_name || '',
+                        email: customer.email || '',
+                        phone: customer.phone || '',
+                        address: customer.address || '',
+                        idNumber: customer.idNumber || customer.id_number || '',
+                        gender: customer.gender ? customer.gender.toLowerCase() : '', // Normalize to lowercase
+                        nationality: customer.nationality || ''
+                    }));
+                    filteredCustomers = [...customers];
+                    displayCustomers();
+                    updateStats();
+                    populateNationalityFilter();
+                })
+                .catch(error => {
+                    console.error("Failed to load customers:", error);
+                    // Load demo data as fallback
+                    loadDemoCustomers();
+                });
+        }
+
+        // Load demo customers for demonstration
+        function loadDemoCustomers() {
+            customers = [
+                {
+                    id: 1,
+                    fullName: 'John Smith',
+                    email: 'john.smith@email.com',
+                    phone: '+1-555-0101',
+                    address: '123 Main St, New York, NY 10001, USA',
+                    idNumber: 'P123456789',
+                    gender: 'male',
+                    nationality: 'American'
+                },
+                {
+                    id: 2,
+                    fullName: 'Sarah Johnson',
+                    email: 'sarah.j@email.com',
+                    phone: '+1-555-0102',
+                    address: '456 Oak Ave, Los Angeles, CA 90210, USA',
+                    idNumber: 'P987654321',
+                    gender: 'female',
+                    nationality: 'American'
+                },
+                {
+                    id: 3,
+                    fullName: 'Rajesh Patel',
+                    email: 'rajesh.patel@email.com',
+                    phone: '+94-77-1234567',
+                    address: '789 Temple Road, Colombo 03, Sri Lanka',
+                    idNumber: '199012345678V',
+                    gender: 'male',
+                    nationality: 'Sri Lankan'
+                },
+                {
+                    id: 4,
+                    fullName: 'Emma Wilson',
+                    email: 'emma.wilson@email.com',
+                    phone: '+44-20-7123-4567',
+                    address: '321 Baker Street, London W1U 6PN, UK',
+                    idNumber: 'P567891234',
+                    gender: 'female',
+                    nationality: 'British'
+                },
+                {
+                    id: 5,
+                    fullName: 'Michael Chen',
+                    email: 'michael.chen@email.com',
+                    phone: '+61-2-9876-5432',
+                    address: '654 George Street, Sydney NSW 2000, Australia',
+                    idNumber: 'P246813579',
+                    gender: 'male',
+                    nationality: 'Australian'
+                }
+            ];
+            filteredCustomers = [...customers];
+            displayCustomers();
+            updateStats();
+            populateNationalityFilter();
+        }
+
+        // Display customers in table
+        function displayCustomers() {
+            const tbody = document.getElementById('customerTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredCustomers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No customers found</td></tr>';
+                return;
+            }
+
+            filteredCustomers.forEach((customer, index) => {
+                const contactInfo = `
+                    <div><strong>${customer.email}</strong></div>
+                    <div class="text-muted">${customer.phone}</div>
+                `;
+
+                // Handle gender badge with proper case handling
+                let genderBadge;
+                if (customer.gender && customer.gender.trim() !== '') {
+                    const genderText = customer.gender.charAt(0).toUpperCase() + customer.gender.slice(1).toLowerCase();
+                    const genderClass = customer.gender.toLowerCase() === 'male' ? 'bg-primary' :
+                        customer.gender.toLowerCase() === 'female' ? 'bg-success' : 'bg-info';
+                    genderBadge = `<span class="badge ${genderClass} customer-type-badge">${genderText}</span>`;
+                } else {
+                    genderBadge = '<span class="text-muted">Not specified</span>';
+                }
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr data-index="${index}">
+                        <td><strong>${customer.fullName}</strong></td>
+                        <td>${contactInfo}</td>
+                        <td>${customer.address}</td>
+                        <td>${customer.idNumber}</td>
+                        <td>${genderBadge}</td>
+                        <td>${customer.nationality || 'Not specified'}</td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm" onclick="showCustomerForm(${index})" title="Edit">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = filteredCustomers.length;
+
+            // Count genders with case-insensitive comparison
+            const male = filteredCustomers.filter(c =>
+                c.gender && c.gender.toLowerCase() === 'male'
+            ).length;
+            const female = filteredCustomers.filter(c =>
+                c.gender && c.gender.toLowerCase() === 'female'
+            ).length;
+
+            // Count unique nationalities
+            const uniqueNationalities = new Set(
+                filteredCustomers
+                    .filter(c => c.nationality && c.nationality.trim() !== '')
+                    .map(c => c.nationality.trim())
+            ).size;
+
+            document.getElementById('totalCustomers').textContent = total;
+            document.getElementById('maleCustomers').textContent = male;
+            document.getElementById('femaleCustomers').textContent = female;
+            document.getElementById('uniqueNationalities').textContent = uniqueNationalities;
+        }
+
+        // Populate nationality filter dropdown
+        function populateNationalityFilter() {
+            const nationalityFilter = document.getElementById('nationalityFilter');
+            const nationalities = new Set(
+                customers
+                    .filter(c => c.nationality && c.nationality.trim() !== '')
+                    .map(c => c.nationality)
+            );
+
+            nationalityFilter.innerHTML = '<option value="all">All Nationalities</option>';
+            Array.from(nationalities).sort().forEach(nationality => {
+                nationalityFilter.insertAdjacentHTML('beforeend',
+                    `<option value="${nationality}">${nationality}</option>`);
+            });
+        }
+
+        // Filter customers
+        function filterCustomers() {
+            const genderFilter = document.getElementById('genderFilter').value;
+            const nationalityFilter = document.getElementById('nationalityFilter').value;
+            const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+
+            filteredCustomers = customers.filter(customer => {
+                // Gender filter - handle case insensitivity and null values
+                if (genderFilter !== 'all') {
+                    const customerGender = customer.gender ? customer.gender.toLowerCase() : '';
+                    if (customerGender !== genderFilter.toLowerCase()) return false;
+                }
+
+                // Nationality filter - handle case insensitivity and null values
+                if (nationalityFilter !== 'all') {
+                    const customerNationality = customer.nationality ? customer.nationality.trim() : '';
+                    if (customerNationality !== nationalityFilter) return false;
+                }
+
+                // Search filter
+                if (searchTerm) {
+                    const searchableText = `${customer.fullName || ''} ${customer.email || ''} ${customer.phone || ''} ${customer.idNumber || ''} ${customer.nationality || ''}`.toLowerCase();
+                    if (!searchableText.includes(searchTerm)) return false;
+                }
+
+                return true;
+            });
+
+            displayCustomers();
+            updateStats();
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            document.getElementById('genderFilter').value = 'all';
+            document.getElementById('nationalityFilter').value = 'all';
+            document.getElementById('searchFilter').value = '';
+            filteredCustomers = [...customers];
+            displayCustomers();
+            updateStats();
+        }
+
+        // Show customer form
+        function showCustomerForm(index, isAdd = false) {
+            document.getElementById('customerIndex').value = index;
+            document.getElementById('customerFormTitle').innerHTML = isAdd ?
+                '<i class="fas fa-user-plus me-2"></i>Add New Customer' :
+                '<i class="fas fa-user-edit me-2"></i>Edit Customer';
+
+            const customer = isAdd ? {} : filteredCustomers[index];
+
+            // Populate form fields
+            document.getElementById('customerName').value = customer.fullName || '';
+            document.getElementById('customerEmail').value = customer.email || '';
+            document.getElementById('customerPhone').value = customer.phone || '';
+            document.getElementById('customerNIC').value = customer.idNumber || '';
+            document.getElementById('customerAddress').value = customer.address || '';
+            document.getElementById('customerGender').value = customer.gender || '';
+            document.getElementById('customerNationality').value = customer.nationality || '';
+
+            // Show/hide buttons
+            document.getElementById('deleteBtn').style.display = isAdd ? 'none' : 'inline-block';
+            document.getElementById('historyBtn').style.display = isAdd ? 'none' : 'inline-block';
+
+            // Only replace the table content
+            const tableWrapper = document.getElementById('customerTableWrapper');
+            const formWrapper = document.getElementById('customerFormWrapper');
+
+            // Fade out table
+            tableWrapper.classList.add('fade-out');
+
+            setTimeout(() => {
+                tableWrapper.style.display = 'none';
+                formWrapper.style.display = 'block';
+                formWrapper.classList.add('fade-in');
+
+                // Scroll to form if needed
+                formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+
+        function showAddCustomer() {
+            // Reset form
+            document.getElementById('customerForm').reset();
+            showCustomerForm(customers.length, true);
+        }
+
+        function hideCustomerForm() {
+            const tableWrapper = document.getElementById('customerTableWrapper');
+            const formWrapper = document.getElementById('customerFormWrapper');
+
+            // Fade out form
+            formWrapper.classList.remove('fade-in');
+            formWrapper.classList.add('fade-out');
+
+            setTimeout(() => {
+                formWrapper.style.display = 'none';
+                formWrapper.classList.remove('fade-out');
+
+                // Show table
+                tableWrapper.style.display = 'block';
+                tableWrapper.classList.remove('fade-out');
+                tableWrapper.classList.add('fade-in');
+
+                // Scroll to table
+                tableWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+
+        // Save customer form
+        function saveCustomerForm(event) {
+            event.preventDefault();
+
+            const index = +document.getElementById('customerIndex').value;
+            const isNew = index >= customers.length;
+
+            const customerData = {
+                fullName: document.getElementById('customerName').value,
+                email: document.getElementById('customerEmail').value,
+                phone: document.getElementById('customerPhone').value,
+                idNumber: document.getElementById('customerNIC').value,
+                address: document.getElementById('customerAddress').value,
+                gender: document.getElementById('customerGender').value,
+                nationality: document.getElementById('customerNationality').value
+            };
+
+            const method = isNew ? "POST" : "PUT";
+            const url = isNew
+                ? "http://localhost:8080/api/customers"
+                : `http://localhost:8080/api/customers/${customers[index].id}`;
+
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+
+            fetch(url, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify(customerData)
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to save customer');
+                    return response.json();
+                })
+                .then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: isNew ? 'Customer Added!' : 'Customer Updated!',
+                        text: `Customer ${customerData.fullName} has been ${isNew ? 'added' : 'updated'} successfully.`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    hideCustomerForm();
+                    loadCustomers();
+                })
+                .catch(error => {
+                    console.error('Save error:', error);
+                    Swal.fire('Error', 'Failed to save customer. Please try again.', 'error');
+                })
+                .finally(() => {
+                    // Restore button state
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+
+            return false;
+        }
+
+        // Delete customer
+        function deleteCustomer() {
+            const index = +document.getElementById('customerIndex').value;
+            const customer = filteredCustomers[index];
+            const customerId = customer.id;
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Delete Customer',
+                text: `Are you sure you want to delete ${customer.fullName}? This action cannot be undone.`,
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#dc3545'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    fetch(`http://localhost:8080/api/customers/${customerId}`, {
+                        method: "DELETE",
+                        headers: getAuthHeaders()
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Delete failed');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Customer Deleted!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            hideCustomerForm();
+                            loadCustomers();
+                        })
+                        .catch(error => {
+                            console.error('Delete error:', error);
+                            Swal.fire('Error', 'Failed to delete customer. Please try again.', 'error');
+                        });
+                }
+            });
+        }
+
+        // View customer booking history
+        function viewCustomerHistory() {
+            const index = +document.getElementById('customerIndex').value;
+            const customer = filteredCustomers[index];
+
+            Swal.fire({
+                title: `${customer.fullName} - Customer Details`,
+                html: `
+                <div class="text-start">
+                    <p><strong>Full Name:</strong> ${customer.fullName}</p>
+                    <p><strong>Email:</strong> ${customer.email}</p>
+                    <p><strong>Phone:</strong> ${customer.phone}</p>
+                    <p><strong>ID Number:</strong> ${customer.idNumber}</p>
+                    <p><strong>Address:</strong> ${customer.address}</p>
+                    <p><strong>Gender:</strong> ${customer.gender || 'Not specified'}</p>
+                    <p><strong>Nationality:</strong> ${customer.nationality || 'Not specified'}</p>
+                    <hr>
+                    <p><small class="text-muted">Booking history integration coming soon!</small></p>
+                </div>
+                `,
+                confirmButtonText: 'Close',
+                width: '500px'
+            });
+        }
+
+        // Export customers
+        function exportCustomers() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Export Customers',
+                text: 'Customer data export feature coming soon!',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Show customer reports
+        function showCustomerReports() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Customer Reports',
+                html: `
+                <div class="text-start">
+                    <h6>Available Reports:</h6>
+                    <ul>
+                        <li>Customer Demographics Analysis</li>
+                        <li>Booking Frequency Report</li>
+                        <li>VIP Customer Summary</li>
+                        <li>Customer Retention Analysis</li>
+                    </ul>
+                    <p><small class="text-muted">Advanced reporting features coming soon!</small></p>
+                </div>
+                `,
+                confirmButtonText: 'Close'
+            });
+        }
+
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Customer management page loaded');
+            loadCustomers();
+        });
+    </script>
+</body>
+
+</html>

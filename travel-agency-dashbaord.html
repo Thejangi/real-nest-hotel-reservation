@@ -1,0 +1,278 @@
+<!-- travel-agency-dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Agency Dashboard</title>
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body,
+        html {
+            height: 100%;
+            font-family: Arial, sans-serif
+        }
+
+        section {
+            display: flex;
+            height: 100vh
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+            color: #fff;
+            transition: width .3s;
+            overflow: hidden;
+            border-right: 3px solid #ff6b35;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, .15)
+        }
+
+        .sidebar.expanded {
+            width: 280px
+        }
+
+        .sidebar.collapsed {
+            width: 60px
+        }
+
+        .sidebar-header {
+            padding: 20px 15px 10px;
+            border-bottom: 1px solid rgba(255, 107, 53, .2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center
+        }
+
+        .logo-icon {
+            color: #ff6b35;
+            font-size: 1.4rem;
+            margin-right: 10px;
+            transition: margin .3s
+        }
+
+        .logo-text {
+            color: #ff6b35;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: opacity .3s
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #ff6b35;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all .2s;
+            margin-left: 15px
+        }
+
+        .toggle-btn:hover {
+            color: #ff8c42;
+            background: rgba(255, 107, 53, .1)
+        }
+
+        .nav-items {
+            list-style: none;
+            padding: 0 10px;
+            margin-top: 10px;
+            flex-grow: 1
+        }
+
+        .nav-items li {
+            margin-bottom: 12px
+        }
+
+        .nav-items button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background: none;
+            border: none;
+            color: #fff;
+            padding: 14px 15px;
+            cursor: pointer;
+            transition: all .3s;
+            font-size: .95rem;
+            white-space: nowrap;
+            border-radius: 8px
+        }
+
+        .nav-items button:hover {
+            background: #ff6b35;
+            transform: translateX(3px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, .3)
+        }
+
+        .nav-items button.active {
+            background: rgba(255, 107, 53, .2);
+            border-left: 3px solid #ff6b35
+        }
+
+        .icon {
+            font-size: 1.1rem;
+            width: 30px;
+            text-align: center;
+            color: #ff6b35;
+            flex-shrink: 0
+        }
+
+        .label {
+            margin-left: 12px;
+            transition: opacity .3s;
+            font-weight: 500
+        }
+
+        .sidebar.collapsed .label {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin-left: 0
+        }
+
+        .sidebar.collapsed .icon {
+            font-size: 1.4rem
+        }
+
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden
+        }
+
+        .content {
+            flex-grow: 1;
+            background: #f8f8f8;
+            overflow-y: auto;
+            padding: 20px
+        }
+
+        .summary-cards .card {
+            min-height: 140px;
+            border-radius: 12px;
+            background: #1a1a1a;
+            color: white;
+            border: 2px solid #ff6b35
+        }
+
+        .summary-cards .card-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center
+        }
+
+        .user-info {
+            margin-top: auto;
+            padding: 15px;
+            border-top: 1px solid rgba(255, 107, 53, .2);
+            justify-content: left !important;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // Protect
+        const user = JSON.parse(localStorage.getItem('user')) || {};
+        if (!user.name) location.replace('login.html');
+    </script>
+    <section>
+        <div class="sidebar expanded" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-section">
+                    <i class="fas fa-plane logo-icon"></i>
+                    <div class="logo-text">Agency Dashboard</div>
+                </div>
+                <button class="toggle-btn" id="toggleBtn"><i class="fas fa-angle-double-left"></i></button>
+            </div>
+            <ul class="nav-items" id="navList"></ul>
+            <div class="user-info mt-auto mb-3 d-flex align-items-center justify-content-center gap-2">
+                <img id="userAvatar" src="https://i.pravatar.cc/36?u=agency" alt="Agency Avatar" class="rounded-circle"
+                    style="width:32px;height:32px;" />
+                <span id="userName" class="text-white fw-semibold"></span>
+                <button id="logoutBtn" class="btn btn-sm btn-link p-0 text-white" title="Logout"><i
+                        class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Dashboard</h2>
+            </div>
+            <!-- Summary Cards -->
+            <div class="row summary-cards mb-4" id="dashboardSummary"></div>
+            <!-- Iframe Section -->
+            <div class="iframe-wrapper" id="iframeWrapper">
+                <iframe id="contentFrame"></iframe>
+            </div>
+        </div>
+    </section>
+    <script>
+        // Display user
+        document.getElementById('userName').textContent = 'Travel Agency';
+        document.getElementById('logoutBtn').onclick = () => { localStorage.removeItem('user'); location.replace('login.html'); };
+
+        // Nav items
+        const navItems = [
+            { icon: 'fas fa-home', label: 'Dashboard', action: 'dashboard' },
+            { icon: 'fas fa-calendar-alt', label: 'Booking Management', path: 'travel-agency.html' }
+        ];
+        const navList = document.getElementById('navList'), iframeWrapper = document.getElementById('iframeWrapper'), iframe = document.getElementById('contentFrame');
+        navItems.forEach((item, i) => {
+            const li = document.createElement('li'); const btn = document.createElement('button');
+            btn.innerHTML = `<i class="${item.icon} icon"></i><span class="label">${item.label}</span>`;
+            btn.onclick = () => {
+                document.querySelectorAll('.nav-items button').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+                if (item.action === 'dashboard') {
+                    document.getElementById('dashboardSummary').style.display = 'flex'; iframeWrapper.style.display = 'none';
+                } else {
+                    document.getElementById('dashboardSummary').style.display = 'none'; iframeWrapper.style.display = 'block'; iframe.src = item.path;
+                }
+            };
+            if (i === 0) btn.classList.add('active'); li.appendChild(btn); navList.appendChild(li);
+        });
+
+        // Agency summary data
+        const summaryData = {
+            Agency: [
+                { icon: 'fas fa-folder-open', text: 'Your Bookings', count: 28 },
+                { icon: 'fas fa-calendar-week', text: 'Upcoming Check-Ins', count: 5 },
+                { icon: 'fas fa-percent', text: 'Discount Usage', count: '15%' },
+                { icon: 'fas fa-file-invoice', text: 'Outstanding Invoices', count: 3 }
+            ]
+        };
+
+        function loadSummary() {
+            const data = summaryData.Agency;
+            const container = document.getElementById('dashboardSummary'); container.innerHTML = '';
+            data.forEach(item => {
+                const col = document.createElement('div'); col.className = 'col-md-6 col-lg-3 mb-3';
+                col.innerHTML = `<div class="card shadow-sm"><div class="card-body text-center"><i class="${item.icon} fa-2x mb-3"></i><h5 class="card-title">${item.text}</h5><p class="card-text fs-3">${item.count}</p></div></div>`;
+                container.appendChild(col);
+            });
+        }
+
+        // Initial load
+        loadSummary();
+    </script>
+</body>
+
+</html>

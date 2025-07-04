@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real Nest Hotel Reservation Dashboard</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        section {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            background-color: #1a1a1a;
+            color: white;
+            transition: width 0.3s ease;
+            overflow: hidden;
+            border-right: 3px solid #ff6b35;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar.expanded {
+            width: 280px;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        /* Content area */
+        .content {
+            flex-grow: 1;
+            background-color: #f8f8f8;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #ff6b35;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            padding: 5px;
+            margin-left: 15px;
+        }
+
+        .toggle-btn:hover {
+            color: #ff8c42;
+            background-color: rgba(255, 107, 53, 0.1);
+        }
+
+        .nav-items {
+            list-style: none;
+            padding: 0 10px;
+            margin-top: 30px;
+        }
+
+        .nav-items li {
+            display: flex;
+            margin-bottom: 12px;
+            /* Gap between nav items */
+        }
+
+        .nav-items li:last-child {
+            margin-bottom: 0;
+        }
+
+        .nav-items button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background: none;
+            border: none;
+            color: white;
+            padding: 14px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            position: relative;
+            border-radius: 8px;
+            margin: 0;
+        }
+
+        .nav-items button:hover {
+            background-color: #ff6b35;
+            color: white;
+            transform: translateX(3px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .nav-items button:active {
+            background-color: #e55529;
+            transform: translateX(2px);
+        }
+
+        .nav-items button.active {
+            background-color: rgba(255, 107, 53, 0.2);
+            border-left: 3px solid #ff6b35;
+        }
+
+        .nav-items .icon {
+            font-size: 1.1rem;
+            width: 30px;
+            text-align: center;
+            color: #ff6b35;
+            transition: color 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .nav-items button:hover .icon {
+            color: white;
+        }
+
+        .nav-items .label {
+            margin-left: 12px;
+            transition: opacity 0.3s ease;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        .sidebar.collapsed .label {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin-left: 0;
+        }
+
+        .sidebar.collapsed .nav-items button {
+            justify-content: center;
+            padding: 14px 10px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Smooth transitions for expanded state */
+        .sidebar.expanded .label {
+            opacity: 1;
+            transition: opacity 0.3s ease 0.1s;
+        }
+
+        /* Tooltip for collapsed state */
+        .sidebar.collapsed .nav-items button {
+            position: relative;
+        }
+
+        .sidebar.collapsed .nav-items button::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #333;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar.collapsed .nav-items button:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Header section in sidebar */
+        .sidebar-header {
+            padding: 20px 15px 10px;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            padding: 18px 10px 15px;
+            justify-content: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            color: #ff6b35;
+            font-size: 1.4rem;
+            margin-right: 10px;
+            transition: margin 0.3s ease;
+        }
+
+        .sidebar.collapsed .logo-icon {
+            margin-right: 0;
+            font-size: 1.6rem;
+        }
+
+        .logo-text {
+            color: #ff6b35;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .toggle-btn {
+            opacity: 1;
+        }
+
+        .sidebar.expanded .toggle-btn {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <section>
+        <div class="sidebar expanded" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-section">
+                    <i class="fas fa-hotel logo-icon"></i>
+                    <div class="logo-text">Dashboard</div>
+                </div>
+                <button class="toggle-btn" id="toggleBtn"><i class="fas fa-angle-double-left"></i></button>
+            </div>
+            <ul class="nav-items" id="navList">
+                <!-- Nav items injected here -->
+            </ul>
+        </div>
+        <div class="content">
+            <iframe id="contentFrame" src="booking-management.html"></iframe>
+        </div>
+    </section>
+
+    <script>
+        const navItems = [
+            { icon: 'fas fa-calendar-check', label: 'Booking Management', path: 'booking-management.html' },
+            { icon: 'fas fa-user-shield', label: 'User Management', path: 'user-management.html' },
+            { icon: 'fas fa-users', label: 'Customer Management', path: 'customer-management.html' },
+            { icon: 'fas fa-credit-card', label: 'Payment Management', path: 'payment-management.html' },
+            { icon: 'fas fa-chart-line', label: 'Report Management', path: 'report-management.html' },
+            { icon: 'fas fa-plane', label: 'Travel Agency', path: 'travel-agency.html' },
+            { icon: 'fas fa-bed', label: 'Room Management', path: 'room-management.html' },
+            { icon: 'fas fa-building', label: 'Hotel Management', path: 'hotel-management.html' }
+        ];
+
+        const navList = document.getElementById('navList');
+        const iframe = document.getElementById('contentFrame');
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggleBtn');
+
+        navItems.forEach((item, index) => {
+            const li = document.createElement('li');
+            const btn = document.createElement('button');
+            btn.setAttribute('data-tooltip', item.label);
+
+            const iconElem = document.createElement('i');
+            iconElem.className = item.icon + ' icon';
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'label';
+            labelSpan.textContent = item.label;
+
+            btn.append(iconElem, labelSpan);
+
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons
+                document.querySelectorAll('.nav-items button').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                btn.classList.add('active');
+                iframe.src = item.path;
+            });
+
+            // Set first item as active by default
+            if (index === 0) {
+                btn.classList.add('active');
+            }
+
+            li.appendChild(btn);
+            navList.appendChild(li);
+        });
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            sidebar.classList.toggle('expanded');
+
+            // Change toggle icon
+            const icon = toggleBtn.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.className = 'fas fa-angle-double-right';
+            } else {
+                icon.className = 'fas fa-angle-double-left';
+            }
+        });
+    </script>
+</body>
+
+</html>

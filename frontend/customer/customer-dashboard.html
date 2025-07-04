@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Nest - Your Perfect Stay Awaits</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-color: #ff6b35;
+            --secondary-color: #f7931e;
+            --dark-color: #2c3e50;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.8), rgba(247, 147, 30, 0.8)),
+                url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&w=1920') center/cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            color: white;
+            position: relative;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .floating-booking-widget {
+            position: absolute;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        /* Services Section */
+        .services-section {
+            padding: 120px 0 80px;
+            background: #f8f9fa;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        /* Rooms Section */
+        .rooms-section {
+            padding: 80px 0;
+        }
+
+        .room-card {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .room-image {
+            height: 250px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .room-price {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        /* Customer Portal Section */
+        .portal-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 80px 0;
+        }
+
+        .portal-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .portal-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        /* Quick Booking Form */
+        .quick-booking-form {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Testimonials */
+        .testimonial-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+            margin: 1rem;
+        }
+
+        .testimonial-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 4px solid var(--primary-color);
+        }
+
+        /* Navigation */
+        .navbar {
+            transition: all 0.3s ease;
+            padding: 1rem 0;
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color) !important;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0 2rem;
+        }
+
+        /* Utilities */
+        .btn-primary-custom {
+            background: var(--primary-color);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--dark-color);
+        }
+
+        .text-primary-custom {
+            color: var(--primary-color) !important;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .floating-booking-widget {
+                bottom: -150px;
+                padding: 1.5rem;
+            }
+
+            .services-section {
+                padding: 150px 0 60px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top" id="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="#home">
+                <i class="fas fa-hotel me-2"></i>Real Nest
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#rooms">Rooms</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#services">Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="guest-portal.html">
+                            <i class="fas fa-user me-1"></i>My Bookings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="hero-content" data-aos="fade-up">
+                        <h1 class="hero-title">Real Nest</h1>
+                        <p class="hero-subtitle">Where luxury meets comfort and every stay becomes a memory</p>
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <a href="customer-booking.html" class="btn btn-primary-custom btn-lg">
+                                <i class="fas fa-calendar-plus me-2"></i>Book Now
+                            </a>
+                            <a href="#rooms" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-eye me-2"></i>Explore Rooms
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Booking Widget -->
+        <div class="floating-booking-widget" data-aos="fade-up" data-aos-delay="200">
+            <h5 class="text-center mb-4 text-primary-custom">Quick Booking</h5>
+            <form id="quickBookingForm" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Check-in</label>
+                    <input type="date" class="form-control" id="quickCheckin" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Check-out</label>
+                    <input type="date" class="form-control" id="quickCheckout" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Adults</label>
+                    <select class="form-select" id="quickAdults">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Children</label>
+                    <select class="form-select" id="quickChildren">
+                        <option value="0" selected>0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary-custom w-100">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Customer Services</h2>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <a href="customer-booking.html" class="text-decoration-none">
+                        <div class="service-card h-100">
+                            <i class="fas fa-calendar-plus service-icon"></i>
+                            <h4>Easy Booking</h4>
+                            <p class="text-muted">Book your perfect room in just a few clicks with our user-friendly
+                                interface</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <a href="guest-portal.html" class="text-decoration-none">
+                        <div class="service-card h-100">
+                            <i class="fas fa-user-circle service-icon"></i>
+                            <h4>Guest Portal</h4>
+                            <p class="text-muted">Manage your bookings, view history, and access exclusive member
+                                benefits</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="service-card h-100" onclick="showModificationInfo()">
+                        <i class="fas fa-edit service-icon"></i>
+                        <h4>Modify Bookings</h4>
+                        <p class="text-muted">Change dates, room types, or guest details with our flexible modification
+                            policy</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="service-card h-100" onclick="showPaymentInfo()">
+                        <i class="fas fa-shield-alt service-icon"></i>
+                        <h4>Secure Payment</h4>
+                        <p class="text-muted">Multiple payment options with bank-level security and instant confirmation
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rooms Section -->
+    <section id="rooms" class="rooms-section">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Our Rooms</h2>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card room-card">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?ixlib=rb-4.0.3&w=500"
+                                class="room-image" alt="Standard Room">
+                            <div class="room-price">$150/night</div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Standard Room</h5>
+                            <p class="card-text text-muted">Comfortable and affordable with all essential amenities</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-users me-1"></i>2 Guests
+                                    <i class="fas fa-bed ms-2 me-1"></i>1 Bed
+                                </small>
+                                <button class="btn btn-outline-primary btn-sm" onclick="bookRoom('Standard', 150)">
+                                    Book Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card room-card">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?ixlib=rb-4.0.3&w=500"
+                                class="room-image" alt="Deluxe Room">
+                            <div class="room-price">$200/night</div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Deluxe Room</h5>
+                            <p class="card-text text-muted">Spacious room with premium amenities and city views</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-users me-1"></i>3 Guests
+                                    <i class="fas fa-bed ms-2 me-1"></i>1 King
+                                </small>
+                                <button class="btn btn-outline-primary btn-sm" onclick="bookRoom('Deluxe', 200)">
+                                    Book Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card room-card">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&w=500"
+                                class="room-image" alt="Junior Suite">
+                            <div class="room-price">$300/night</div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Junior Suite</h5>
+                            <p class="card-text text-muted">Luxurious suite with separate living area and ocean view</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-users me-1"></i>4 Guests
+                                    <i class="fas fa-bed ms-2 me-1"></i>1 Suite
+                                </small>
+                                <button class="btn btn-outline-primary btn-sm" onclick="bookRoom('Junior Suite', 300)">
+                                    Book Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="card room-card">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&w=500"
+                                class="room-image" alt="Presidential Suite">
+                            <div class="room-price">$500/night</div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Presidential Suite</h5>
+                            <p class="card-text text-muted">Ultimate luxury with panoramic views and exclusive services
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-users me-1"></i>6 Guests
+                                    <i class="fas fa-bed ms-2 me-1"></i>2 Beds
+                                </small>
+                                <button class="btn btn-outline-primary btn-sm"
+                                    onclick="bookRoom('Presidential Suite', 500)">
+                                    Book Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer Portal Section -->
+    <section class="portal-section">
+        <div class="container">
+            <h2 class="section-title text-white" data-aos="fade-up">Manage Your Stay</h2>
+            <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="portal-card h-100" onclick="window.location.href='guest-portal.html'">
+                        <i class="fas fa-search fa-3x mb-3"></i>
+                        <h4>Find My Booking</h4>
+                        <p>Search and view your current and past reservations using booking reference or email</p>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="portal-card h-100" onclick="showModificationDemo()">
+                        <i class="fas fa-edit fa-3x mb-3"></i>
+                        <h4>Modify Reservation</h4>
+                        <p>Change dates, room type, or guest details. Free modifications up to 24 hours before check-in
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="portal-card h-100" onclick="showPaymentDemo()">
+                        <i class="fas fa-credit-card fa-3x mb-3"></i>
+                        <h4>Secure Payment</h4>
+                        <p>Complete payment for pending bookings or manage refunds with our secure payment system</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-5" style="background: #f8f9fa;">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">What Our Guests Say</h2>
+            <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="testimonial-card">
+                        <img src="https://i.pravatar.cc/150?u=guest1" class="testimonial-avatar" alt="Guest">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="mb-3">"The booking process was incredibly smooth and the modification options saved my
+                            trip when plans changed!"</p>
+                        <strong>Sarah Johnson</strong>
+                        <small class="text-muted d-block">Business Traveler</small>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="testimonial-card">
+                        <img src="https://i.pravatar.cc/150?u=guest2" class="testimonial-avatar" alt="Guest">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="mb-3">"Outstanding service and the guest portal made managing our family vacation
+                            effortless. Highly recommended!"</p>
+                        <strong>Michael Chen</strong>
+                        <small class="text-muted d-block">Family Vacation</small>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="testimonial-card">
+                        <img src="https://i.pravatar.cc/150?u=guest3" class="testimonial-avatar" alt="Guest">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="mb-3">"The secure payment system and instant confirmation emails gave me complete
+                            peace of mind. Perfect experience!"</p>
+                        <strong>Emma Davis</strong>
+                        <small class="text-muted d-block">Solo Traveler</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-5">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Contact Us</h2>
+            <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-center">
+                        <i class="fas fa-map-marker-alt fa-3x text-primary-custom mb-3"></i>
+                        <h4>Address</h4>
+                        <p class="text-muted">123 Real Nest Street<br>Colombo, Sri Lanka</p>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-center">
+                        <i class="fas fa-phone fa-3x text-primary-custom mb-3"></i>
+                        <h4>Phone</h4>
+                        <p class="text-muted">+94 11 123 4567<br>Available 24/7</p>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-center">
+                        <i class="fas fa-envelope fa-3x text-primary-custom mb-3"></i>
+                        <h4>Email</h4>
+                        <p class="text-muted">info@realnesthotel.com<br>reservations@realnesthotel.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h4 class="text-primary-custom mb-3">Real Nest</h4>
+                    <p class="text-muted">Experience luxury and comfort at its finest. Your perfect stay awaits at
+                        Real Nest.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-youtube fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="mb-3">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#home" class="text-muted">Home</a></li>
+                        <li><a href="#rooms" class="text-muted">Rooms</a></li>
+                        <li><a href="#services" class="text-muted">Services</a></li>
+                        <li><a href="#contact" class="text-muted">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="mb-3">Services</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="customer-booking.html" class="text-muted">Online Booking</a></li>
+                        <li><a href="guest-portal.html" class="text-muted">Guest Portal</a></li>
+                        <li><a href="#" class="text-muted">Room Service</a></li>
+                        <li><a href="#" class="text-muted">Concierge</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3">
+                    <h5 class="mb-3">Newsletter</h5>
+                    <p class="text-muted">Stay updated with our latest offers and news</p>
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Your email">
+                        <button class="btn btn-primary-custom">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p class="text-muted mb-0">&copy; 2025 Real Nest. All rights reserved. | Privacy Policy | Terms of
+                    Service</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
+    <script>
+        // Initialize AOS (Animate On Scroll)
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function () {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Set minimum dates for quick booking
+        document.addEventListener('DOMContentLoaded', function () {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dayAfter = new Date(tomorrow);
+            dayAfter.setDate(dayAfter.getDate() + 1);
+
+            document.getElementById('quickCheckin').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('quickCheckout').value = dayAfter.toISOString().split('T')[0];
+
+            // Update checkout minimum when checkin changes
+            document.getElementById('quickCheckin').addEventListener('change', function () {
+                const checkinDate = new Date(this.value);
+                checkinDate.setDate(checkinDate.getDate() + 1);
+                document.getElementById('quickCheckout').min = checkinDate.toISOString().split('T')[0];
+            });
+        });
+
+        // Quick booking form submission
+        document.getElementById('quickBookingForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const checkin = document.getElementById('quickCheckin').value;
+            const checkout = document.getElementById('quickCheckout').value;
+            const adults = document.getElementById('quickAdults').value;
+            const children = document.getElementById('quickChildren').value;
+
+            // Redirect to booking page with parameters
+            const params = new URLSearchParams({
+                checkin: checkin,
+                checkout: checkout,
+                adults: adults,
+                children: children
+            });
+
+            window.location.href = `customer-booking.html?${params.toString()}`;
+        });
+
+        // Book room function
+        function bookRoom(roomType, price) {
+            const checkin = document.getElementById('quickCheckin').value;
+            const checkout = document.getElementById('quickCheckout').value;
+            const adults = document.getElementById('quickAdults').value;
+            const children = document.getElementById('quickChildren').value;
+
+            const params = new URLSearchParams({
+                checkin: checkin,
+                checkout: checkout,
+                adults: adults,
+                children: children,
+                roomType: roomType,
+                price: price
+            });
+
+            window.location.href = `customer-booking.html?${params.toString()}`;
+        }
+
+        // Service information functions
+        function showModificationInfo() {
+            Swal.fire({
+                title: 'Booking Modification',
+                html: `
+                    <div class="text-start">
+                        <h5><i class="fas fa-info-circle text-primary me-2"></i>Modification Policy</h5>
+                        <ul>
+                            <li>Free modifications up to 24 hours before check-in</li>
+                            <li>Modifications within 24 hours incur a $25 fee</li>
+                            <li>Subject to room availability</li>
+                            <li>Price differences may apply for room upgrades</li>
+                        </ul>
+                        <div class="mt-3">
+                            <button class="btn btn-primary me-2" onclick="window.location.href='guest-portal.html'">
+                                Access Guest Portal
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="window.location.href='booking-modification.html'">
+                                Try Demo
+                            </button>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: '600px'
+            });
+        }
+
+        function showPaymentInfo() {
+            Swal.fire({
+                title: 'Secure Payment Options',
+                html: `
+                    <div class="text-start">
+                        <h5><i class="fas fa-shield-alt text-success me-2"></i>Payment Methods</h5>
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <div class="border rounded p-2 text-center">
+                                    <i class="fas fa-credit-card fa-2x text-primary mb-2"></i>
+                                    <div>Credit/Debit Cards</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-2 text-center">
+                                    <i class="fab fa-paypal fa-2x text-primary mb-2"></i>
+                                    <div>PayPal</div>
+                                </div>
+                            </div>
+                        </div>
+                        <ul>
+                            <li>256-bit SSL encryption</li>
+                            <li>PCI DSS compliant</li>
+                            <li>Instant confirmation</li>
+                            <li>Secure refund processing</li>
+                        </ul>
+                        <div class="mt-3">
+                            <button class="btn btn-primary" onclick="window.location.href='payment-gateway.html'">
+                                View Payment Demo
+                            </button>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: '600px'
+            });
+        }
+
+        function showModificationDemo() {
+            window.location.href = 'booking-modification.html?demo=true';
+        }
+
+        function showPaymentDemo() {
+            window.location.href = 'payment-gateway.html?demo=true';
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Welcome message for new visitors
+        if (!localStorage.getItem('visitedBefore')) {
+            setTimeout(() => {
+                Swal.fire({
+                    title: 'Welcome to Real Nest!',
+                    text: 'Discover our customer-friendly booking system with easy modifications and secure payments.',
+                    icon: 'info',
+                    confirmButtonText: 'Explore Now',
+                    showCancelButton: true,
+                    cancelButtonText: 'Maybe Later'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('services').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+                localStorage.setItem('visitedBefore', 'true');
+            }, 2000);
+        }
+    </script>
+    <!-- Include customer utilities -->
+    <script src="assets/js/customer-utils.js"></script>
+</body>
+
+</html>

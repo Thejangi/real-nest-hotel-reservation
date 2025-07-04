@@ -1,0 +1,49 @@
+# =========================
+# Java & Maven (Spring Boot)
+# =========================
+/target/
+*.class
+*.jar
+*.war
+.mvn/
+!mvnw
+!mvnw.cmd
+
+# =========================
+# IDEs and Editors
+# =========================
+.idea/
+.vscode/
+*.iml
+
+# =========================
+# OS Junk
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs, Temp Files, Env
+# =========================
+*.log
+*.tmp
+*.bak
+.env
+
+# =========================
+# Node (if used in future)
+# =========================
+node_modules/
+
+# =========================
+# Build cache or export junk
+# =========================
+dist/
+build/
+out/
+
+# =========================
+# Database Dumps
+# =========================
+*.sql
+*.db
