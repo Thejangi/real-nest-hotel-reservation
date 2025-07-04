@@ -1,12 +1,15 @@
 com\realnest\controller\AuthController.class
 com\realnest\dto\RoomDTO.class
+com\realnest\entity\Booking$BookingStatus.class
 com\realnest\controller\RoomController.class
 com\realnest\service\impl\ReportServiceImpl.class
 com\realnest\repository\RoomRepository.class
 com\realnest\service\BookingService.class
+com\realnest\service\impl\BookingServiceImpl$1.class
 com\realnest\entity\Room.class
 com\realnest\service\impl\PaymentServiceImpl.class
 com\realnest\dto\BillingSummary.class
+com\realnest\service\impl\TravelAgencyServiceImpl$AgencyBookingStats.class
 com\realnest\entity\TravelAgency.class
 com\realnest\entity\Booking.class
 com\realnest\entity\Room$RoomType.class
@@ -33,6 +36,7 @@ com\realnest\repository\InvoiceRepository.class
 com\realnest\service\impl\BookingServiceImpl.class
 com\realnest\util\Constants.class
 com\realnest\entity\Invoice$InvoiceBuilder.class
+com\realnest\entity\Booking$MealPlan.class
 com\realnest\security\UserDetailsServiceImpl.class
 com\realnest\controller\PaymentController.class
 com\realnest\controller\CustomerController.class
@@ -64,9 +68,12 @@ com\realnest\repository\CustomerRepository.class
 com\realnest\config\WebConfig.class
 com\realnest\dto\RegisterRequest.class
 com\realnest\dto\AuthRequest.class
+com\realnest\entity\Booking$PaymentStatus.class
 com\realnest\dto\ReportDTO.class
 com\realnest\entity\Customer$CustomerBuilder.class
+com\realnest\service\impl\TravelAgencyServiceImpl$AgencyCreditStatus.class
 com\realnest\security\UserDetailsImpl.class
 com\realnest\service\impl\RoomServiceImpl.class
 com\realnest\dto\AuthResponse.class
 com\realnest\entity\Customer.class
+com\realnest\entity\Booking$PaymentTerms.class

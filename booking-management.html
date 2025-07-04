@@ -9,16 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .capacity-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .capacity-indicator i {
-            color: #007bff;
-        }
-
         .form-container {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 12px;
@@ -47,16 +37,7 @@
             min-height: 400px;
         }
 
-        .room-status-badge {
-            transition: all 0.2s ease;
-        }
-
-        .form-check-input:checked {
-            background-color: #28a745;
-            border-color: #28a745;
-        }
-
-        /* Fixed stats cards responsive design */
+        /* Stats cards */
         .stats-container {
             margin-bottom: 1.5rem;
         }
@@ -71,7 +52,19 @@
             transform: translateY(-2px);
         }
 
-        /* Better responsive behavior */
+        /* Page header */
+        .page-header {
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive behavior */
         @media (max-width: 768px) {
             .stats-container .col-md-3 {
                 margin-bottom: 1rem;
@@ -101,17 +94,17 @@
                 justify-content: center;
                 margin-bottom: 0.5rem;
             }
-        }
 
-        /* Validation styling */
-        .form-control.is-invalid {
-            border-color: #dc3545;
-            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-        }
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
 
-        .form-select.is-invalid {
-            border-color: #dc3545;
-            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+            .page-header h3 {
+                text-align: center;
+                margin-bottom: 1rem;
+            }
         }
 
         /* Smooth transitions */
@@ -129,44 +122,26 @@
             transform: translateY(0);
         }
 
-        /* Fix table layout issues */
+        /* Table layout */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Better form layout */
+        .status-badge {
+            font-size: 0.85rem;
+            padding: 0.4em 0.8em;
+        }
+
         .form-section {
             margin-bottom: 2rem;
         }
 
-        .form-section:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Fix header alignment */
-        .page-header {
-            margin-bottom: 2rem;
-            align-items: center;
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        @media (max-width: 992px) {
-            .page-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1rem;
-            }
-
-            .page-header h3 {
-                text-align: center;
-                margin-bottom: 1rem;
-            }
+        .form-section h6 {
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -176,18 +151,22 @@
         <div class="d-flex page-header">
             <h3 class="mb-0 flex-grow-1">
                 <i class="fas fa-calendar-check me-2 text-primary"></i>
-                Booking Management System
+                Booking Management
             </h3>
             <div class="header-buttons">
                 <button class="btn btn-primary" onclick="showAddBooking()">
-                    <i class="fas fa-plus"></i> New Booking
+                    <i class="fas fa-plus"></i> Add Booking
                 </button>
-                <button class="btn btn-warning" onclick="processAllNoShows()">
-                    <i class="fas fa-clock"></i> Process No-Shows
+                <button class="btn btn-outline-secondary" onclick="logout()" id="logoutBtn" style="display:none;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
-                <button class="btn btn-info" onclick="generateDailyReport()">
-                    <i class="fas fa-file-alt"></i> Daily Report
-                </button>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="text-center py-4" style="display:none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
         </div>
 
@@ -222,11 +201,11 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <div class="card bg-danger text-white stats-card">
+                    <div class="card bg-info text-white stats-card">
                         <div class="card-body text-center">
-                            <i class="fas fa-user-times fa-2x mb-2"></i>
-                            <h5>No-Shows</h5>
-                            <h3 id="noShowBookings">0</h3>
+                            <i class="fas fa-bed fa-2x mb-2"></i>
+                            <h5>Block Bookings</h5>
+                            <h3 id="blockBookings">0</h3>
                         </div>
                     </div>
                 </div>
@@ -241,22 +220,18 @@
                         <label class="form-label">Status</label>
                         <select class="form-select" id="statusFilter" onchange="filterBookings()">
                             <option value="all">All Statuses</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="pending">Pending</option>
-                            <option value="cancelled">Cancelled</option>
-                            <option value="no-show">No-Show</option>
-                            <option value="auto-cancelled">Auto-Cancelled</option>
-                            <option value="checked-in">Checked-In</option>
+                            <option value="CONFIRMED">Confirmed</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="CANCELLED">Cancelled</option>
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Room Type</label>
-                        <select class="form-select" id="roomTypeFilter" onchange="filterBookings()">
-                            <option value="all">All Types</option>
-                            <option value="SINGLE">Single</option>
-                            <option value="DOUBLE">Double</option>
-                            <option value="DELUXE">Deluxe</option>
-                            <option value="SUITE">Suite</option>
+                        <label class="form-label">Payment</label>
+                        <select class="form-select" id="paymentFilter" onchange="filterBookings()">
+                            <option value="all">All Payments</option>
+                            <option value="PAID">Paid</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="PARTIAL">Partial</option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -269,8 +244,8 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Search</label>
-                        <input type="text" class="form-control" id="searchFilter"
-                            placeholder="Customer name, booking ID..." onkeyup="filterBookings()">
+                        <input type="text" class="form-control" id="searchFilter" placeholder="Booking ID, reference..."
+                            onkeyup="filterBookings()">
                     </div>
                     <div class="col-md-1">
                         <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
@@ -281,22 +256,23 @@
             </div>
         </div>
 
-        <!-- Bookings Table -->
+        <!-- Table Section -->
         <div id="bookingTableWrapper" class="fade-transition fade-in">
             <div class="table-container">
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped mb-0">
                         <thead class="table-dark">
                             <tr>
-                                <th>Booking ID</th>
-                                <th>Customer Name</th>
-                                <th>Room Type</th>
-                                <th>Occupants</th>
-                                <th>Arrival</th>
-                                <th>Departure</th>
+                                <th>ID</th>
+                                <th>Reference</th>
+                                <th>Agency ID</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Nights</th>
+                                <th>Rooms</th>
                                 <th>Total Amount</th>
-                                <th>Payment</th>
-                                <th>Status</th>
+                                <th>Payment Status</th>
+                                <th>Booking Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -308,7 +284,7 @@
             </div>
         </div>
 
-        <!-- Booking Form Section -->
+        <!-- Form Section -->
         <div id="bookingFormWrapper" class="fade-transition" style="display:none;">
             <form id="bookingForm" class="form-container" onsubmit="return saveBookingForm(event)">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -321,134 +297,196 @@
                     </button>
                 </div>
 
-                <input type="hidden" id="bookingIndex">
+                <input type="hidden" id="bookingId">
 
                 <div class="form-section">
-                    <h6 class="mb-3"><i class="fas fa-user me-2"></i>Customer Information</h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Customer Name <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" class="form-control" id="customerName" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Email <span class="text-danger">*</span>
-                            </label>
-                            <input type="email" class="form-control" id="customerEmail" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h6 class="mb-3"><i class="fas fa-bed me-2"></i>Room & Stay Details</h6>
-                    <div class="row g-3 mb-3">
-                        <div class="col-lg-4 col-md-6">
-                            <label class="form-label">
-                                Room Type <span class="text-danger">*</span>
-                            </label>
-                            <select class="form-select" id="roomType" required onchange="calculateTotal()">
-                                <option value="">Select...</option>
-                                <option value="SINGLE">Single ($120/night)</option>
-                                <option value="DOUBLE">Double ($150/night)</option>
-                                <option value="DELUXE">Deluxe ($180/night)</option>
-                                <option value="SUITE">Suite ($300/night)</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-4 col-md-6">
-                            <label class="form-label">
-                                Number of Occupants <span class="text-danger">*</span>
-                            </label>
-                            <input type="number" class="form-control" id="occupants" min="1" required>
-                        </div>
-                        <div class="col-lg-4 col-md-6">
-                            <label class="form-label">
-                                Number of Nights
-                            </label>
-                            <input type="number" class="form-control" id="numberOfNights" readonly>
-                        </div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Arrival Date <span class="text-danger">*</span>
-                            </label>
-                            <input type="date" class="form-control" id="arrivalDate" required
-                                onchange="calculateNights()">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Departure Date <span class="text-danger">*</span>
-                            </label>
-                            <input type="date" class="form-control" id="departureDate" required
-                                onchange="calculateNights()">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h6 class="mb-3"><i class="fas fa-credit-card me-2"></i>Payment Information</h6>
-                    <div class="row g-3">
-                        <div class="col-lg-6">
-                            <label class="form-label">Credit Card Number</label>
-                            <input type="text" class="form-control" id="cardNumber"
-                                placeholder="xxxx-xxxx-xxxx-xxxx" onchange="validatePayment()">
-                            <small class="text-muted">Leave empty for cash payment (will auto-cancel at 7 PM)</small>
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <label class="form-label">Expiry Date</label>
-                            <input type="month" class="form-control" id="cardExpiry">
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <label class="form-label">CVC</label>
-                            <input type="text" class="form-control" id="cardCVC" maxlength="3">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h6 class="mb-3"><i class="fas fa-calculator me-2"></i>Billing Information</h6>
+                    <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>Basic Information</h6>
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <label class="form-label">Room Charges</label>
-                            <input type="text" class="form-control" id="roomCharges" readonly>
+                            <label class="form-label">
+                                Booking Reference
+                            </label>
+                            <input type="text" class="form-control" id="bookingReference" placeholder="Optional">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Additional Charges</label>
-                            <input type="text" class="form-control" id="additionalCharges" readonly>
+                            <label class="form-label">
+                                Block Reference
+                            </label>
+                            <input type="text" class="form-control" id="blockReference" placeholder="Optional">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Total Amount</label>
-                            <input type="text" class="form-control fw-bold" id="totalAmount" readonly>
+                            <label class="form-label">
+                                Travel Agency ID
+                            </label>
+                            <input type="number" class="form-control" id="travelAgencyId" placeholder="Optional">
                         </div>
                     </div>
+                </div>
 
+                <div class="form-section">
+                    <h6 class="mb-3"><i class="fas fa-calendar me-2"></i>Dates & Duration</h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Check-In Date <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control" id="checkInDate" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Check-Out Date <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control" id="checkOutDate" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Number of Nights <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control" id="numberOfNights" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h6 class="mb-3"><i class="fas fa-bed me-2"></i>Room Details</h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                Total Rooms <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control" id="numberOfRooms" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                Standard Rooms
+                            </label>
+                            <input type="number" class="form-control" id="standardRooms" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                Deluxe Rooms
+                            </label>
+                            <input type="number" class="form-control" id="deluxeRooms" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                Suite Rooms
+                            </label>
+                            <input type="number" class="form-control" id="suiteRooms" value="0">
+                        </div>
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">
-                                Status
+                                Group Size
                             </label>
-                            <select class="form-select" id="bookingStatus">
-                                <option value="pending">Pending</option>
-                                <option value="confirmed">Confirmed</option>
-                                <option value="cancelled">Cancelled</option>
-                                <option value="no-show">No-Show</option>
-                                <option value="auto-cancelled">Auto-Cancelled</option>
-                                <option value="checked-in">Checked-In</option>
-                            </select>
+                            <input type="number" class="form-control" id="groupSize" placeholder="Number of guests">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">
-                                Payment Status
+                                Meal Plan
                             </label>
-                            <select class="form-select" id="paymentStatus">
-                                <option value="pending">Pending</option>
-                                <option value="paid">Paid</option>
-                                <option value="partial">Partial</option>
-                                <option value="failed">Failed</option>
+                            <select class="form-select" id="mealPlan">
+                                <option value="">Select Meal Plan</option>
+                                <option value="EP">European Plan (Room Only)</option>
+                                <option value="CP">Continental Plan (Breakfast)</option>
+                                <option value="MAP">Modified American Plan (Breakfast + Dinner)</option>
+                                <option value="AP">American Plan (All Meals)</option>
                             </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h6 class="mb-3"><i class="fas fa-dollar-sign me-2"></i>Pricing & Payment</h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Subtotal Amount <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" step="0.01" class="form-control" id="subtotalAmount" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Discount %
+                            </label>
+                            <input type="number" step="0.01" class="form-control" id="discountPercentage" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Discount Amount
+                            </label>
+                            <input type="number" step="0.01" class="form-control" id="discountAmount" value="0">
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Total Amount <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" step="0.01" class="form-control" id="totalAmount" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Advance Amount
+                            </label>
+                            <input type="number" step="0.01" class="form-control" id="advanceAmount" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Advance Paid
+                            </label>
+                            <input type="number" step="0.01" class="form-control" id="advancePaidAmount" value="0">
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Payment Terms
+                            </label>
+                            <input type="text" class="form-control" id="paymentTerms"
+                                placeholder="e.g., 50% advance, balance on arrival">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Payment Status <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="paymentStatus" required>
+                                <option value="">Select Payment Status</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="PARTIAL">Partial</option>
+                                <option value="PAID">Paid</option>
+                                <option value="OVERDUE">Overdue</option>
+                                <option value="REFUNDED">Refunded</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h6 class="mb-3"><i class="fas fa-clipboard-check me-2"></i>Status & Requirements</h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Booking Status <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="bookingStatus" required>
+                                <option value="">Select Booking Status</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="CONFIRMED">Confirmed</option>
+                                <option value="CANCELLED">Cancelled</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="NO_SHOW">No Show</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">
+                                Special Requirements
+                            </label>
+                            <textarea class="form-control" id="specialRequirements" rows="3"
+                                placeholder="Any special requests or requirements..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -457,9 +495,6 @@
                     <div class="d-flex gap-3 flex-wrap">
                         <button type="button" class="btn btn-danger" onclick="deleteBooking()" id="deleteBtn">
                             <i class="fas fa-trash-alt"></i> Delete
-                        </button>
-                        <button type="button" class="btn btn-warning" onclick="markNoShow()" id="noShowBtn">
-                            <i class="fas fa-user-times"></i> Mark No-Show
                         </button>
                     </div>
                     <div class="d-flex gap-3 flex-wrap">
@@ -475,53 +510,286 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:8080/api';
+        const BOOKING_ENDPOINT = `${API_BASE_URL}/bookings`;
+
+        // Global variables
         let bookings = [];
         let filteredBookings = [];
-        let editingBookingId = null;
 
-        // Authentication helper
-        function getAuthHeaders() {
-            const token = localStorage.getItem('jwtToken') || localStorage.getItem('jwt_token') || localStorage.getItem('token');
-            if (!token) {
-                console.warn('No JWT token found in localStorage');
-                return {
-                    'Content-Type': 'application/json'
-                };
-            }
-            return {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            };
+        // Get JWT token from localStorage (adjust based on your auth implementation)
+        function getAuthToken() {
+            // Try multiple possible token storage keys
+            return localStorage.getItem('authToken') ||
+                localStorage.getItem('token') ||
+                localStorage.getItem('jwtToken') ||
+                sessionStorage.getItem('authToken') ||
+                sessionStorage.getItem('token') ||
+                sessionStorage.getItem('jwtToken');
         }
 
-        // Show/Hide form functions with smooth transitions
-        function showBookingForm(index, isAdd = false) {
-            document.getElementById('bookingIndex').value = index;
-            document.getElementById('bookingFormTitle').innerHTML = isAdd ?
-                '<i class="fas fa-plus me-2"></i>Add New Booking' :
+        // API Headers with authentication
+        function getHeaders() {
+            const token = getAuthToken();
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            return headers;
+        }
+
+        // Show loading spinner
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('bookingTableWrapper').style.display = 'none';
+        }
+
+        // Hide loading spinner
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('bookingTableWrapper').style.display = 'block';
+        }
+
+        // Load bookings from API
+        async function loadBookings() {
+            showLoading();
+            try {
+                const response = await fetch(BOOKING_ENDPOINT, {
+                    method: 'GET',
+                    headers: getHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                bookings = data;
+                filteredBookings = [...bookings];
+                displayBookings(filteredBookings);
+                updateStats();
+
+                // Show logout button if authenticated (optional)
+                const token = getAuthToken();
+                if (token) {
+                    document.getElementById('logoutBtn').style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Loading Bookings',
+                    text: 'Unable to load bookings. Please check your connection and try again.',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = filteredBookings.length;
+            const confirmed = filteredBookings.filter(b => b.bookingStatus === 'CONFIRMED').length;
+            const pending = filteredBookings.filter(b => b.bookingStatus === 'PENDING').length;
+            const blockBookings = filteredBookings.filter(b => b.numberOfRooms >= 3).length;
+
+            document.getElementById('totalBookings').textContent = total;
+            document.getElementById('confirmedBookings').textContent = confirmed;
+            document.getElementById('pendingBookings').textContent = pending;
+            document.getElementById('blockBookings').textContent = blockBookings;
+        }
+
+        // Filter bookings
+        function filterBookings() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const paymentFilter = document.getElementById('paymentFilter').value;
+            const fromDate = document.getElementById('fromDateFilter').value;
+            const toDate = document.getElementById('toDateFilter').value;
+            const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+
+            filteredBookings = bookings.filter(booking => {
+                // Status filter
+                if (statusFilter !== 'all' && booking.bookingStatus !== statusFilter) return false;
+
+                // Payment filter
+                if (paymentFilter !== 'all' && booking.paymentStatus !== paymentFilter) return false;
+
+                // Date filters
+                if (fromDate && booking.checkInDate && booking.checkInDate < fromDate) return false;
+                if (toDate && booking.checkInDate && booking.checkInDate > toDate) return false;
+
+                // Search filter
+                if (searchTerm) {
+                    const searchableText = `${booking.id} ${booking.bookingReference || ''} ${booking.blockReference || ''} ${booking.travelAgencyId || ''}`.toLowerCase();
+                    if (!searchableText.includes(searchTerm)) return false;
+                }
+
+                return true;
+            });
+
+            displayBookings(filteredBookings);
+            updateStats();
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('paymentFilter').value = 'all';
+            document.getElementById('fromDateFilter').value = '';
+            document.getElementById('toDateFilter').value = '';
+            document.getElementById('searchFilter').value = '';
+            filteredBookings = [...bookings];
+            displayBookings(filteredBookings);
+            updateStats();
+        }
+
+        // Logout function
+        function logout() {
+            Swal.fire({
+                icon: 'question',
+                title: 'Logout',
+                text: 'Are you sure you want to logout?',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Logout',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear();
+                    sessionStorage.clear();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Logged Out',
+                        text: 'You have been successfully logged out.',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+
+                    setTimeout(() => {
+                        window.history.back() || (window.location.href = '/');
+                    }, 1500);
+                }
+            });
+        }
+
+        // Display bookings in table
+        function displayBookings(bookingsToShow) {
+            const tbody = document.getElementById('bookingTableBody');
+            tbody.innerHTML = '';
+
+            if (bookingsToShow.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted">No bookings found</td></tr>';
+                return;
+            }
+
+            bookingsToShow.forEach((booking, index) => {
+                const checkInDate = booking.checkInDate ? new Date(booking.checkInDate).toLocaleDateString() : 'N/A';
+                const checkOutDate = booking.checkOutDate ? new Date(booking.checkOutDate).toLocaleDateString() : 'N/A';
+
+                const paymentStatusClass = getPaymentStatusClass(booking.paymentStatus);
+                const bookingStatusClass = getBookingStatusClass(booking.bookingStatus);
+
+                const isBlockBooking = booking.numberOfRooms >= 3;
+                const blockBadge = isBlockBooking ? '<span class="badge bg-info ms-1">Block</span>' : '';
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>
+                            <strong>${booking.id}</strong>
+                            ${blockBadge}
+                        </td>
+                        <td>${booking.bookingReference || booking.blockReference || 'N/A'}</td>
+                        <td>${booking.travelAgencyId || 'N/A'}</td>
+                        <td>${checkInDate}</td>
+                        <td>${checkOutDate}</td>
+                        <td>${booking.numberOfNights || 0}</td>
+                        <td>${booking.numberOfRooms || 0}</td>
+                        <td><strong>$${formatAmount(booking.totalAmount)}</strong></td>
+                        <td><span class="badge status-badge ${paymentStatusClass}">${booking.paymentStatus || 'UNKNOWN'}</span></td>
+                        <td><span class="badge status-badge ${bookingStatusClass}">${booking.bookingStatus || 'UNKNOWN'}</span></td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm" onclick="showBookingForm(${booking.id})" title="Edit">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        function getPaymentStatusClass(status) {
+            const statusClasses = {
+                'PAID': 'bg-success',
+                'PENDING': 'bg-warning text-dark',
+                'PARTIAL': 'bg-info',
+                'OVERDUE': 'bg-danger',
+                'REFUNDED': 'bg-secondary'
+            };
+            return statusClasses[status] || 'bg-secondary';
+        }
+
+        function getBookingStatusClass(status) {
+            const statusClasses = {
+                'CONFIRMED': 'bg-success',
+                'PENDING': 'bg-warning text-dark',
+                'CANCELLED': 'bg-danger',
+                'COMPLETED': 'bg-primary',
+                'NO_SHOW': 'bg-dark'
+            };
+            return statusClasses[status] || 'bg-secondary';
+        }
+
+        function formatAmount(amount) {
+            if (amount == null) return '0.00';
+            return parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Show booking form
+        async function showBookingForm(bookingId = null) {
+            const isNew = bookingId === null;
+            document.getElementById('bookingFormTitle').innerHTML = isNew ?
+                '<i class="fas fa-plus me-2"></i>Add Booking' :
                 '<i class="fas fa-edit me-2"></i>Edit Booking';
+            document.getElementById('bookingId').value = isNew ? '' : bookingId;
+            document.getElementById('deleteBtn').style.display = isNew ? 'none' : 'inline-block';
 
-            const booking = bookings[index] || {};
-            editingBookingId = booking.id || null;
+            // Clear form
+            document.getElementById('bookingForm').reset();
+            document.getElementById('checkInDate').value = new Date().toISOString().split('T')[0];
 
-            // Populate form fields
-            document.getElementById('customerName').value = booking.customerName || booking.guest_name || '';
-            document.getElementById('customerEmail').value = booking.email || booking.guest_email || '';
-            document.getElementById('roomType').value = booking.roomType || booking.room_type || '';
-            document.getElementById('occupants').value = booking.occupants || booking.number_of_guests || '';
-            document.getElementById('arrivalDate').value = booking.arrivalDate || booking.check_in_date || '';
-            document.getElementById('departureDate').value = booking.departureDate || booking.check_out_date || '';
-            document.getElementById('cardNumber').value = booking.cardNumber || booking.card_number || '';
-            document.getElementById('bookingStatus').value = booking.bookingStatus || booking.booking_status || 'pending';
-            document.getElementById('paymentStatus').value = booking.paymentStatus || booking.payment_status || 'pending';
-            document.getElementById('totalAmount').value = `${(booking.totalAmount || booking.total_amount || 0).toFixed(2)}`;
+            if (!isNew) {
+                // Load existing booking data
+                try {
+                    const response = await fetch(`${BOOKING_ENDPOINT}/${bookingId}`, {
+                        method: 'GET',
+                        headers: getHeaders()
+                    });
 
-            // Show/hide delete and no-show buttons
-            document.getElementById('deleteBtn').style.display = isAdd ? 'none' : 'inline-block';
-            document.getElementById('noShowBtn').style.display = isAdd ? 'none' : 'inline-block';
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const booking = await response.json();
+                    fillForm(booking);
+                } catch (error) {
+                    console.error('Error loading booking:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Loading Booking',
+                        text: 'Unable to load booking details.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+            }
 
             // Only replace the table content
             const tableWrapper = document.getElementById('bookingTableWrapper');
@@ -538,14 +806,40 @@
                 // Scroll to form if needed
                 formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 300);
-
-            // Calculate totals if editing
-            if (!isAdd) {
-                calculateNights();
-                calculateTotal();
-            }
         }
 
+        // Fill form with booking data
+        function fillForm(booking) {
+            document.getElementById('bookingReference').value = booking.bookingReference || '';
+            document.getElementById('blockReference').value = booking.blockReference || '';
+            document.getElementById('travelAgencyId').value = booking.travelAgencyId || '';
+            document.getElementById('checkInDate').value = booking.checkInDate || '';
+            document.getElementById('checkOutDate').value = booking.checkOutDate || '';
+            document.getElementById('numberOfNights').value = booking.numberOfNights || '';
+            document.getElementById('numberOfRooms').value = booking.numberOfRooms || '';
+            document.getElementById('standardRooms').value = booking.standardRooms || 0;
+            document.getElementById('deluxeRooms').value = booking.deluxeRooms || 0;
+            document.getElementById('suiteRooms').value = booking.suiteRooms || 0;
+            document.getElementById('groupSize').value = booking.groupSize || '';
+            document.getElementById('mealPlan').value = booking.mealPlan || '';
+            document.getElementById('subtotalAmount').value = booking.subtotalAmount || '';
+            document.getElementById('discountPercentage').value = booking.discountPercentage || 0;
+            document.getElementById('discountAmount').value = booking.discountAmount || 0;
+            document.getElementById('totalAmount').value = booking.totalAmount || '';
+            document.getElementById('advanceAmount').value = booking.advanceAmount || 0;
+            document.getElementById('advancePaidAmount').value = booking.advancePaidAmount || 0;
+            document.getElementById('paymentTerms').value = booking.paymentTerms || '';
+            document.getElementById('paymentStatus').value = booking.paymentStatus || '';
+            document.getElementById('bookingStatus').value = booking.bookingStatus || '';
+            document.getElementById('specialRequirements').value = booking.specialRequirements || '';
+        }
+
+        // Show add booking form
+        function showAddBooking() {
+            showBookingForm(null);
+        }
+
+        // Hide booking form
         function hideBookingForm() {
             const tableWrapper = document.getElementById('bookingTableWrapper');
             const formWrapper = document.getElementById('bookingFormWrapper');
@@ -566,373 +860,158 @@
                 // Scroll to table
                 tableWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 300);
-
-            editingBookingId = null;
         }
 
-        function showAddBooking() {
-            // Reset form
-            document.getElementById('bookingForm').reset();
+        // Save booking form
+        async function saveBookingForm(event) {
+            event.preventDefault();
 
-            // Set default values
-            document.getElementById('bookingStatus').value = 'pending';
-            document.getElementById('paymentStatus').value = 'pending';
-            document.getElementById('roomCharges').value = '$0.00';
-            document.getElementById('additionalCharges').value = '$0.00';
-            document.getElementById('totalAmount').value = '$0.00';
-            document.getElementById('numberOfNights').value = '';
+            const bookingId = document.getElementById('bookingId').value;
+            const isNew = !bookingId;
 
-            // Set minimum date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('arrivalDate').min = today;
-            document.getElementById('departureDate').min = today;
-
-            showBookingForm(bookings.length, true);
-        }
-
-        // Save booking form with improved error handling
-        function saveBookingForm(e) {
-            e.preventDefault();
-
-            // Validate required fields
-            const requiredFields = ['customerName', 'customerEmail', 'roomType', 'occupants', 'arrivalDate', 'departureDate'];
-            let isValid = true;
-
-            requiredFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (!field.value.trim()) {
-                    field.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    field.classList.remove('is-invalid');
-                }
-            });
-
-            if (!isValid) {
-                Swal.fire('Validation Error', 'Please fill in all required fields.', 'error');
-                return false;
-            }
-
-            const index = +document.getElementById('bookingIndex').value;
             const bookingData = {
-                customerName: document.getElementById('customerName').value.trim(),
-                email: document.getElementById('customerEmail').value.trim(),
-                roomType: document.getElementById('roomType').value,
-                occupants: parseInt(document.getElementById('occupants').value),
-                arrivalDate: document.getElementById('arrivalDate').value,
-                departureDate: document.getElementById('departureDate').value,
-                cardNumber: document.getElementById('cardNumber').value.trim(),
-                bookingStatus: document.getElementById('bookingStatus').value,
+                bookingReference: document.getElementById('bookingReference').value || null,
+                blockReference: document.getElementById('blockReference').value || null,
+                travelAgencyId: document.getElementById('travelAgencyId').value ? parseInt(document.getElementById('travelAgencyId').value) : null,
+                checkInDate: document.getElementById('checkInDate').value,
+                checkOutDate: document.getElementById('checkOutDate').value,
+                numberOfNights: parseInt(document.getElementById('numberOfNights').value),
+                numberOfRooms: parseInt(document.getElementById('numberOfRooms').value),
+                standardRooms: parseInt(document.getElementById('standardRooms').value) || 0,
+                deluxeRooms: parseInt(document.getElementById('deluxeRooms').value) || 0,
+                suiteRooms: parseInt(document.getElementById('suiteRooms').value) || 0,
+                groupSize: document.getElementById('groupSize').value ? parseInt(document.getElementById('groupSize').value) : null,
+                mealPlan: document.getElementById('mealPlan').value || null,
+                subtotalAmount: parseFloat(document.getElementById('subtotalAmount').value),
+                discountPercentage: parseFloat(document.getElementById('discountPercentage').value) || 0,
+                discountAmount: parseFloat(document.getElementById('discountAmount').value) || 0,
+                totalAmount: parseFloat(document.getElementById('totalAmount').value),
+                advanceAmount: parseFloat(document.getElementById('advanceAmount').value) || 0,
+                advancePaidAmount: parseFloat(document.getElementById('advancePaidAmount').value) || 0,
+                paymentTerms: document.getElementById('paymentTerms').value || null,
                 paymentStatus: document.getElementById('paymentStatus').value,
-                totalAmount: parseFloat(document.getElementById('totalAmount').value.replace(/[$,]/g, ''))
+                bookingStatus: document.getElementById('bookingStatus').value,
+                specialRequirements: document.getElementById('specialRequirements').value || null
             };
 
-            const isNew = index >= bookings.length;
-            const url = isNew
-                ? 'http://localhost:8080/api/bookings'
-                : `http://localhost:8080/api/bookings/${editingBookingId}`;
-            const method = isNew ? 'POST' : 'PUT';
+            try {
+                const url = isNew ? BOOKING_ENDPOINT : `${BOOKING_ENDPOINT}/${bookingId}`;
+                const method = isNew ? 'POST' : 'PUT';
 
-            // Show loading state
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-            submitBtn.disabled = true;
-
-            fetch(url, {
-                method,
-                headers: getAuthHeaders(),
-                body: JSON.stringify(bookingData)
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to save booking');
-                    return response.json();
-                })
-                .then(() => {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: `Booking ${isNew ? 'created' : 'updated'} successfully!`,
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    hideBookingForm();
-                    fetchBookings();
-                })
-                .catch(error => {
-                    console.error('Save error:', error);
-                    Swal.fire('Error', 'Something went wrong while saving the booking.', 'error');
-                })
-                .finally(() => {
-                    // Restore button state
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
+                const response = await fetch(url, {
+                    method: method,
+                    headers: getHeaders(),
+                    body: JSON.stringify(bookingData)
                 });
 
-            return false;
-        }
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
-        // Fetch all bookings from backend
-        function fetchBookings() {
-            console.log('Fetching bookings...');
-            fetch('http://localhost:8080/api/bookings', {
-                method: 'GET',
-                headers: getAuthHeaders()
-            })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Bookings received:', data);
-                    bookings = data;
-                    filteredBookings = [...bookings];
-                    loadBookings();
-                    updateStats();
-                })
-                .catch(error => {
-                    console.error('Error fetching bookings:', error);
-                    const tbody = document.getElementById('bookingTableBody');
-                    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-danger">Error loading bookings. Please check your connection and try again.</td></tr>';
+                const savedBooking = await response.json();
 
-                    // Show authentication error if likely
-                    if (error.message.includes('401') || error.message.includes('403')) {
-                        Swal.fire('Authentication Error', 'Please log in to view bookings.', 'error');
-                    }
+                Swal.fire({
+                    icon: 'success',
+                    title: isNew ? 'Booking Added!' : 'Booking Updated!',
+                    showConfirmButton: false,
+                    timer: 1500
                 });
-        }
 
-        // Load bookings into table
-        function loadBookings() {
-            const tbody = document.getElementById('bookingTableBody');
-            tbody.innerHTML = '';
+                hideBookingForm();
+                loadBookings();
 
-            if (filteredBookings.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No bookings found</td></tr>';
-                return;
-            }
-
-            filteredBookings.forEach((booking, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${booking.id}</td>
-                    <td>${booking.customerName || booking.guest_name || 'N/A'}</td>
-                    <td><span class="badge bg-info">${booking.roomType || booking.room_type || 'N/A'}</span></td>
-                    <td><span class="capacity-indicator"><i class="fas fa-users"></i> ${booking.occupants || booking.number_of_guests || 'N/A'}</span></td>
-                    <td>${booking.arrivalDate || booking.check_in_date || 'N/A'}</td>
-                    <td>${booking.departureDate || booking.check_out_date || 'N/A'}</td>
-                    <td>$${(booking.totalAmount || booking.total_amount || 0).toFixed(2)}</td>
-                    <td><span class="badge bg-${getPaymentStatusColor(booking.paymentStatus || booking.payment_status)}">${booking.paymentStatus || booking.payment_status || 'N/A'}</span></td>
-                    <td><span class="badge bg-${getStatusColor(booking.bookingStatus || booking.booking_status)}">${booking.bookingStatus || booking.booking_status || 'N/A'}</span></td>
-                    <td>
-                        <button class="btn btn-outline-primary btn-sm" onclick="editBooking(${index})" title="Edit">
-                            <i class="fas fa-pencil-alt"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Edit booking - find the actual index in the main bookings array
-        function editBooking(filteredIndex) {
-            const booking = filteredBookings[filteredIndex];
-            const actualIndex = bookings.findIndex(b => b.id === booking.id);
-            showBookingForm(actualIndex, false);
-        }
-
-        // Update statistics
-        function updateStats() {
-            const confirmed = bookings.filter(b => (b.bookingStatus || b.booking_status) === 'confirmed').length;
-            const pending = bookings.filter(b => (b.bookingStatus || b.booking_status) === 'pending').length;
-            const noShows = bookings.filter(b => (b.bookingStatus || b.booking_status) === 'no-show').length;
-
-            document.getElementById('totalBookings').textContent = bookings.length;
-            document.getElementById('confirmedBookings').textContent = confirmed;
-            document.getElementById('pendingBookings').textContent = pending;
-            document.getElementById('noShowBookings').textContent = noShows;
-        }
-
-        // Filter bookings
-        function filterBookings() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const roomTypeFilter = document.getElementById('roomTypeFilter').value;
-            const fromDate = document.getElementById('fromDateFilter').value;
-            const toDate = document.getElementById('toDateFilter').value;
-            const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
-
-            filteredBookings = bookings.filter(booking => {
-                const status = booking.bookingStatus || booking.booking_status || '';
-                const roomType = booking.roomType || booking.room_type || '';
-                const arrivalDate = booking.arrivalDate || booking.check_in_date || '';
-                const customerName = (booking.customerName || booking.guest_name || '').toLowerCase();
-                const bookingId = (booking.id || '').toString();
-
-                return (statusFilter === 'all' || status === statusFilter) &&
-                    (roomTypeFilter === 'all' || roomType === roomTypeFilter) &&
-                    (!fromDate || arrivalDate >= fromDate) &&
-                    (!toDate || arrivalDate <= toDate) &&
-                    (!searchTerm || customerName.includes(searchTerm) || bookingId.includes(searchTerm));
-            });
-
-            loadBookings();
-        }
-
-        // Clear all filters
-        function clearFilters() {
-            document.getElementById('statusFilter').value = 'all';
-            document.getElementById('roomTypeFilter').value = 'all';
-            document.getElementById('fromDateFilter').value = '';
-            document.getElementById('toDateFilter').value = '';
-            document.getElementById('searchFilter').value = '';
-            filteredBookings = [...bookings];
-            loadBookings();
-        }
-
-        // Helper functions for styling
-        function getStatusColor(status) {
-            switch (status) {
-                case 'confirmed': return 'success';
-                case 'pending': return 'warning';
-                case 'cancelled': return 'danger';
-                case 'no-show': return 'dark';
-                case 'auto-cancelled': return 'secondary';
-                case 'checked-in': return 'info';
-                default: return 'secondary';
-            }
-        }
-
-        function getPaymentStatusColor(status) {
-            switch (status) {
-                case 'paid': return 'success';
-                case 'pending': return 'warning';
-                case 'failed': return 'danger';
-                case 'partial': return 'info';
-                default: return 'secondary';
+            } catch (error) {
+                console.error('Error saving booking:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Saving Booking',
+                    text: 'Unable to save booking. Please check your input and try again.',
+                    confirmButtonText: 'OK'
+                });
             }
         }
 
         // Delete booking
-        function deleteBooking() {
-            const index = document.getElementById('bookingIndex').value;
-            const bookingId = editingBookingId;
+        async function deleteBooking() {
+            const bookingId = document.getElementById('bookingId').value;
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `Do you really want to delete Booking ID ${bookingId}?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!'
-            }).then(result => {
-                if (result.isConfirmed) {
-                    fetch(`http://localhost:8080/api/bookings/${bookingId}`, {
-                        method: 'DELETE',
-                        headers: getAuthHeaders()
-                    })
-                        .then(response => {
-                            if (!response.ok) throw new Error('Delete failed');
-                            Swal.fire('Deleted!', 'Booking has been deleted.', 'success');
-                            hideBookingForm();
-                            fetchBookings();
-                        })
-                        .catch(error => {
-                            console.error('Delete error:', error);
-                            Swal.fire('Error', 'Failed to delete booking.', 'error');
-                        });
-                }
-            });
-        }
-
-        // Calculate nights
-        function calculateNights() {
-            const arrivalDate = new Date(document.getElementById('arrivalDate').value);
-            const departureDate = new Date(document.getElementById('departureDate').value);
-
-            if (arrivalDate && departureDate && departureDate > arrivalDate) {
-                const nights = Math.ceil((departureDate - arrivalDate) / (1000 * 60 * 60 * 24));
-                document.getElementById('numberOfNights').value = nights;
-                calculateTotal();
-            }
-        }
-
-        // Calculate total
-        function calculateTotal() {
-            const roomType = document.getElementById('roomType').value;
-            const nights = parseInt(document.getElementById('numberOfNights').value) || 0;
-
-            const rates = {
-                'SINGLE': 120,
-                'DOUBLE': 150,
-                'DELUXE': 180,
-                'SUITE': 300
-            };
-
-            const roomRate = rates[roomType] || 0;
-            const roomCharges = roomRate * nights;
-            const additionalCharges = 0; // You can add logic for additional charges here
-            const totalAmount = roomCharges + additionalCharges;
-
-            document.getElementById('roomCharges').value = `$${roomCharges.toFixed(2)}`;
-            document.getElementById('additionalCharges').value = `$${additionalCharges.toFixed(2)}`;
-            document.getElementById('totalAmount').value = `$${totalAmount.toFixed(2)}`;
-        }
-
-        // Mark as no-show
-        function markNoShow() {
-            document.getElementById('bookingStatus').value = 'no-show';
-            // Auto save when marking as no-show
-            document.getElementById('bookingForm').dispatchEvent(new Event('submit'));
-        }
-
-        // Process all no-shows
-        function processAllNoShows() {
-            const noShowBookings = bookings.filter(b => (b.bookingStatus || b.booking_status) === 'no-show');
-
-            if (noShowBookings.length === 0) {
-                Swal.fire('No No-Shows', 'There are no no-show bookings to process.', 'info');
+            if (!bookingId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Cannot delete a new booking!',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
                 return;
             }
 
-            Swal.fire({
-                title: 'Process All No-Shows',
-                text: `This will process charges for ${noShowBookings.length} no-show bookings.`,
+            const result = await Swal.fire({
                 icon: 'warning',
+                title: 'Delete this booking?',
+                text: 'This action cannot be undone!',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, process all!'
-            }).then(result => {
-                if (result.isConfirmed) {
-                    // Here you would implement the actual charge processing
-                    Swal.fire('Success!', `${noShowBookings.length} no-show charges processed successfully!`, 'success');
-                    fetchBookings();
-                }
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#d33'
             });
-        }
 
-        // Generate daily report
-        function generateDailyReport() {
-            Swal.fire('Report Generated', 'Daily report has been generated and saved.', 'success');
-        }
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`${BOOKING_ENDPOINT}/${bookingId}`, {
+                        method: 'DELETE',
+                        headers: getHeaders()
+                    });
 
-        // Validate payment
-        function validatePayment() {
-            const cardNumber = document.getElementById('cardNumber').value;
-            if (cardNumber && cardNumber.length > 0) {
-                document.getElementById('paymentStatus').value = 'pending';
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Booking Deleted!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+
+                    hideBookingForm();
+                    loadBookings();
+
+                } catch (error) {
+                    console.error('Error deleting booking:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Deleting Booking',
+                        text: 'Unable to delete booking. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                }
             }
         }
 
-        // DOM Ready
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('DOM loaded, fetching bookings...');
-            fetchBookings();
-
-            // Set today's date as default for from date filter
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('fromDateFilter').value = today;
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            testAuthentication();
         });
+
+        // Test authentication - modified to work without token
+        async function testAuthentication() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/bookings`, {
+                    method: 'GET',
+                    headers: getHeaders()
+                });
+
+                if (response.ok) {
+                    loadBookings();
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('API call failed:', error);
+                // Show error but still try to load (maybe it's a network issue)
+                loadBookings();
+            }
+        }
     </script>
 </body>
 

@@ -13,6 +13,8 @@ public interface TravelAgencyService {
 
     TravelAgency getAgencyById(Long id);
 
+    TravelAgency updateAgency(Long id, TravelAgency agency);
+
     void deleteAgency(Long id);
 
     List<Booking> createBulkBooking(Long agencyId, List<Booking> bookings);

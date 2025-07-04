@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel Agency Management</title>
+    <title>Travel Agency & Block Booking Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -17,29 +17,6 @@
             margin-bottom: 2rem;
             max-height: 80vh;
             overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        .btn-group-custom {
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #495057;
-        }
-
-        .table-responsive {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            min-height: 400px;
-        }
-
-        /* Stats cards */
-        .stats-container {
-            margin-bottom: 1.5rem;
         }
 
         .stats-card {
@@ -52,62 +29,6 @@
             transform: translateY(-2px);
         }
 
-        /* Page header */
-        .page-header {
-            margin-bottom: 2rem;
-            align-items: center;
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        /* Responsive behavior */
-        @media (max-width: 768px) {
-            .stats-container .col-md-3 {
-                margin-bottom: 1rem;
-            }
-
-            .header-buttons {
-                flex-direction: column;
-                width: 100%;
-                gap: 10px;
-            }
-
-            .header-buttons .btn {
-                margin-bottom: 0.5rem;
-            }
-
-            .form-container {
-                padding: 1rem;
-                max-height: 75vh;
-            }
-
-            .btn-group-custom {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .btn-group-custom .d-flex {
-                justify-content: center;
-                margin-bottom: 0.5rem;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1rem;
-            }
-
-            .page-header h3 {
-                text-align: center;
-                margin-bottom: 1rem;
-            }
-        }
-
-        /* Smooth transitions */
         .fade-transition {
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
@@ -122,48 +43,50 @@
             transform: translateY(0);
         }
 
-        /* Table layout */
-        .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* Form sections */
-        .form-section {
-            margin-bottom: 2rem;
-        }
-
-        .form-section:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Loading spinner */
         #loadingSpinner .spinner-border {
             width: 3rem;
             height: 3rem;
         }
 
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
+        .room-type-card {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .room-type-card:hover {
+            border-color: #0d6efd;
+        }
+
+        .pricing-summary {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-group-custom {
+            gap: 15px;
+            flex-wrap: wrap;
         }
     </style>
 </head>
 
 <body>
     <div class="container mt-4">
-        <div class="d-flex page-header">
+        <div class="d-flex page-header mb-4">
             <h3 class="mb-0 flex-grow-1">
                 <i class="fas fa-building me-2 text-primary"></i>
-                Travel Agency Management System
+                Travel Agency & Block Booking System
             </h3>
-            <div class="header-buttons">
+            <div class="d-flex gap-3">
                 <button class="btn btn-success" onclick="showCreateAgency()">
                     <i class="fas fa-plus"></i> Register New Agency
                 </button>
                 <button class="btn btn-primary" onclick="showCreateBlockBooking()">
-                    <i class="fas fa-calendar-plus"></i> New Block Booking
+                    <i class="fas fa-plus"></i> New Block Booking
                 </button>
             </div>
         </div>
@@ -176,42 +99,40 @@
         </div>
 
         <!-- Quick Stats -->
-        <div class="stats-container" id="statsSection">
-            <div class="row g-3">
-                <div class="col-lg-3 col-md-6">
-                    <div class="card bg-primary text-white stats-card">
-                        <div class="card-body text-center">
-                            <i class="fas fa-building fa-2x mb-2"></i>
-                            <h5>Total Agencies</h5>
-                            <h3 id="totalAgenciesCount">0</h3>
-                        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-primary text-white stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-building fa-2x mb-2"></i>
+                        <h5>Total Agencies</h5>
+                        <h3 id="totalAgenciesCount">0</h3>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="card bg-success text-white stats-card">
-                        <div class="card-body text-center">
-                            <i class="fas fa-calendar-check fa-2x mb-2"></i>
-                            <h5>Active Bookings</h5>
-                            <h3 id="activeBookingsCount">0</h3>
-                        </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-success text-white stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                        <h5>Block Bookings</h5>
+                        <h3 id="blockBookingsCount">0</h3>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="card bg-info text-white stats-card">
-                        <div class="card-body text-center">
-                            <i class="fas fa-percentage fa-2x mb-2"></i>
-                            <h5>Avg Discount</h5>
-                            <h3 id="avgDiscount">0%</h3>
-                        </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-info text-white stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-percentage fa-2x mb-2"></i>
+                        <h5>Avg Discount</h5>
+                        <h3 id="avgDiscount">0%</h3>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="card bg-warning text-white stats-card">
-                        <div class="card-body text-center">
-                            <i class="fas fa-credit-card fa-2x mb-2"></i>
-                            <h5>Prepaid Required</h5>
-                            <h3 id="prepaidAgencies">0</h3>
-                        </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card bg-warning text-white stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-credit-card fa-2x mb-2"></i>
+                        <h5>Prepaid Required</h5>
+                        <h3 id="prepaidAgencies">0</h3>
                     </div>
                 </div>
             </div>
@@ -238,26 +159,23 @@
             <div class="tab-pane fade show active" id="agencies" role="tabpanel">
                 <!-- Agencies Table -->
                 <div id="agenciesTableWrapper" class="fade-transition fade-in">
-                    <div class="table-container">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped mb-0">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Agency Name</th>
-                                        <th>Email</th>
-                                        <th>Phone</th>
-                                        <th>Address</th>
-                                        <th>Discount %</th>
-                                        <th>Prepayment Required</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="agenciesTableBody">
-                                    <!-- Populated by JS -->
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Agency Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Discount %</th>
+                                    <th>Prepayment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agenciesTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -266,8 +184,7 @@
                     <form id="agencyForm" class="form-container" onsubmit="return saveAgency(event)">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="mb-0" id="agencyFormTitle">
-                                <i class="fas fa-edit me-2"></i>
-                                Edit Travel Agency
+                                <i class="fas fa-edit me-2"></i>Edit Travel Agency
                             </h5>
                             <button type="button" class="btn btn-outline-secondary" onclick="hideAgencyForm()">
                                 <i class="fas fa-times"></i>
@@ -276,65 +193,51 @@
 
                         <input type="hidden" id="agencyId">
 
-                        <div class="form-section">
-                            <h6 class="mb-3"><i class="fas fa-building me-2"></i>Agency Information</h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">
-                                        Agency Name <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" class="form-control" id="agencyName" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">
-                                        Email <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="email" class="form-control" id="agencyEmail" required>
-                                </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Agency Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="agencyName" required>
                             </div>
-                            <div class="row g-3 mt-2">
-                                <div class="col-md-6">
-                                    <label class="form-label">
-                                        Phone <span class="text-danger">*</span>
+                            <div class="col-md-6">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="agencyEmail" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Phone <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="agencyPhone" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Address</label>
+                                <input type="text" class="form-control" id="agencyAddress">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Discount Percentage</label>
+                                <input type="number" class="form-control" id="agencyDiscount" min="0" max="50"
+                                    step="0.1" value="0">
+                                <small class="text-muted">Maximum discount allowed for this agency</small>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="prepaymentRequired">
+                                    <label class="form-check-label" for="prepaymentRequired">
+                                        <strong>Prepayment Required</strong><br>
+                                        <small class="text-muted">Agency must pay in advance for all bookings</small>
                                     </label>
-                                    <input type="tel" class="form-control" id="agencyPhone" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Address</label>
-                                    <input type="text" class="form-control" id="agencyAddress">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="form-section">
-                            <h6 class="mb-3"><i class="fas fa-cogs me-2"></i>Business Settings</h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Discount Percentage</label>
-                                    <input type="number" class="form-control" id="agencyDiscount" min="0" max="50"
-                                        step="0.1" value="0">
-                                    <small class="text-muted">Maximum discount allowed for this agency</small>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check mt-4">
-                                        <input class="form-check-input" type="checkbox" id="prepaymentRequired">
-                                        <label class="form-check-label" for="prepaymentRequired">
-                                            <strong>Prepayment Required</strong>
-                                        </label>
-                                        <div class="form-text">Agency must pay in advance for all bookings</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between flex-wrap btn-group-custom">
-                            <div class="d-flex gap-3 flex-wrap">
-                                <button type="button" class="btn btn-danger" onclick="deleteAgency()"
-                                    id="deleteAgencyBtn">
-                                    <i class="fas fa-trash-alt"></i> Delete
-                                </button>
-                            </div>
-                            <div class="d-flex gap-3 flex-wrap">
+                        <div class="d-flex justify-content-between btn-group-custom">
+                            <button type="button" class="btn btn-danger" onclick="deleteAgency()" id="deleteAgencyBtn">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                            <div class="d-flex gap-3">
                                 <button type="button" class="btn btn-secondary" onclick="hideAgencyForm()">
                                     <i class="fas fa-arrow-left"></i> Back
                                 </button>
@@ -349,11 +252,206 @@
 
             <!-- Block Bookings Tab -->
             <div class="tab-pane fade" id="bookings" role="tabpanel">
-                <!-- Bookings content will be here -->
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Block booking functionality will be implemented after agency management is set up.
-                    Please create and manage travel agencies first.
+                <!-- Block Bookings Table -->
+                <div id="blockBookingsTableWrapper" class="fade-transition fade-in">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-calendar-check me-2"></i>Block Bookings</h5>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>Agency</th>
+                                    <th>Check-In</th>
+                                    <th>Check-Out</th>
+                                    <th>Nights</th>
+                                    <th>Rooms</th>
+                                    <th>Total Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="blockBookingsTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Block Booking Form -->
+                <div id="blockBookingFormWrapper" class="fade-transition" style="display:none;">
+                    <form id="blockBookingForm" class="form-container" onsubmit="return saveBlockBooking(event)">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0" id="blockBookingFormTitle">
+                                <i class="fas fa-calendar-plus me-2"></i>New Block Booking
+                            </h5>
+                            <button type="button" class="btn btn-outline-secondary" onclick="hideBlockBookingForm()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <input type="hidden" id="blockBookingId">
+
+                        <!-- Agency Selection -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Travel Agency <span class="text-danger">*</span></label>
+                                <select class="form-select" id="blockAgencySelect" required
+                                    onchange="validateBlockAgency()">
+                                    <option value="">Select Agency...</option>
+                                </select>
+                                <div id="blockAgencyInfo" class="mt-2" style="display: none;"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Block Reference</label>
+                                <input type="text" class="form-control" id="blockReference"
+                                    placeholder="e.g., Summer Group Tour 2025">
+                            </div>
+                        </div>
+
+                        <!-- Stay Details -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label">Check-In Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="blockCheckInDate" required
+                                    onchange="calculateBlockNights()">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Check-Out Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="blockCheckOutDate" required
+                                    onchange="calculateBlockNights()">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Number of Nights</label>
+                                <input type="number" class="form-control" id="blockNumberOfNights" readonly>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Group Size</label>
+                                <input type="number" class="form-control" id="blockGroupSize" min="1">
+                            </div>
+                        </div>
+
+                        <!-- Room Distribution -->
+                        <h6 class="mb-3"><i class="fas fa-bed me-2"></i>Room Distribution (Minimum 3 rooms required)
+                        </h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="room-type-card">
+                                    <h6 class="text-primary">Standard Rooms</h6>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="me-2">$120/night</span>
+                                        <span class="badge bg-secondary">Basic amenities</span>
+                                    </div>
+                                    <input type="number" class="form-control" id="blockStandardRooms" min="0" value="0"
+                                        onchange="updateBlockRoomDistribution()">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="room-type-card">
+                                    <h6 class="text-success">Deluxe Rooms</h6>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="me-2">$180/night</span>
+                                        <span class="badge bg-success">Premium amenities</span>
+                                    </div>
+                                    <input type="number" class="form-control" id="blockDeluxeRooms" min="0" value="0"
+                                        onchange="updateBlockRoomDistribution()">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="room-type-card">
+                                    <h6 class="text-warning">Suite Rooms</h6>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="me-2">$300/night</span>
+                                        <span class="badge bg-warning text-dark">Luxury suites</span>
+                                    </div>
+                                    <input type="number" class="form-control" id="blockSuiteRooms" min="0" value="0"
+                                        onchange="updateBlockRoomDistribution()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mb-4">
+                            <strong>Total Rooms:</strong> <span id="totalRoomsDisplay">0</span>
+                            <span id="roomValidationMessage" class="text-danger ms-3" style="display: none;">Minimum 3
+                                rooms required for block booking</span>
+                        </div>
+
+                        <!-- Pricing & Payment -->
+                        <h6 class="mb-3"><i class="fas fa-credit-card me-2"></i>Pricing & Payment</h6>
+                        <div class="pricing-summary">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">Subtotal</label>
+                                    <input type="text" class="form-control" id="blockSubtotal" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Discount %</label>
+                                    <input type="number" class="form-control" id="blockDiscountPercent" min="0" max="50"
+                                        step="0.1" onchange="calculateBlockTotal()">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Discount Amount</label>
+                                    <input type="text" class="form-control" id="blockDiscountAmount" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label"><strong>Total Amount</strong></label>
+                                    <input type="text" class="form-control fw-bold text-primary" id="blockTotalAmount"
+                                        readonly>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Payment Terms</label>
+                                    <select class="form-select" id="blockPaymentTerms"
+                                        onchange="calculateBlockAdvance()">
+                                        <option value="FULL_ADVANCE">Full Payment in Advance</option>
+                                        <option value="FIFTY_ADVANCE">50% Advance + 50% on Arrival</option>
+                                        <option value="THIRTY_ADVANCE">30% Advance + 70% on Arrival</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Required Advance Payment</label>
+                                    <input type="text" class="form-control" id="blockAdvanceAmount" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Options -->
+                        <div class="row g-3 mb-4 mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Meal Plan</label>
+                                <select class="form-select" id="blockMealPlan">
+                                    <option value="ROOM_ONLY">Room Only</option>
+                                    <option value="BREAKFAST">Breakfast Included</option>
+                                    <option value="HALF_BOARD">Half Board</option>
+                                    <option value="FULL_BOARD">Full Board</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Special Requirements</label>
+                                <textarea class="form-control" id="blockSpecialRequirements" rows="2"
+                                    placeholder="Any special arrangements..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between btn-group-custom">
+                            <button type="button" class="btn btn-danger" onclick="deleteBlockBooking()"
+                                id="deleteBlockBtn" style="display: none;">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                            <div class="d-flex gap-3">
+                                <button type="button" class="btn btn-secondary" onclick="hideBlockBookingForm()">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Create Block Booking
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -364,9 +462,18 @@
     <script>
         // API Configuration
         const API_BASE_URL = 'http://localhost:8080/api/travel-agencies';
+        const BOOKING_API_URL = 'http://localhost:8080/api/bookings';
 
         // Global data
         let travelAgencies = [];
+        let blockBookings = [];
+
+        // Room rates
+        const roomRates = {
+            standard: 120,
+            deluxe: 180,
+            suite: 300
+        };
 
         // Utility functions
         function showLoading() {
@@ -395,16 +502,15 @@
             });
         }
 
-        // API calls
+        // API calls for Travel Agencies
         async function fetchAgencies() {
             try {
                 showLoading();
                 const response = await fetch(API_BASE_URL);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 travelAgencies = await response.json();
                 loadAgenciesTable();
+                loadAgencySelects();
                 updateStats();
             } catch (error) {
                 console.error('Error fetching agencies:', error);
@@ -419,19 +525,14 @@
                 showLoading();
                 const response = await fetch(API_BASE_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(agencyData)
                 });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const newAgency = await response.json();
                 travelAgencies.push(newAgency);
                 loadAgenciesTable();
+                loadAgencySelects();
                 updateStats();
                 return newAgency;
             } catch (error) {
@@ -447,22 +548,15 @@
                 showLoading();
                 const response = await fetch(`${API_BASE_URL}/${id}`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(agencyData)
                 });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const updatedAgency = await response.json();
                 const index = travelAgencies.findIndex(a => a.id === id);
-                if (index !== -1) {
-                    travelAgencies[index] = updatedAgency;
-                }
+                if (index !== -1) travelAgencies[index] = updatedAgency;
                 loadAgenciesTable();
+                loadAgencySelects();
                 updateStats();
                 return updatedAgency;
             } catch (error) {
@@ -476,16 +570,11 @@
         async function removeAgency(id) {
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE_URL}/${id}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
+                const response = await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 travelAgencies = travelAgencies.filter(a => a.id !== id);
                 loadAgenciesTable();
+                loadAgencySelects();
                 updateStats();
             } catch (error) {
                 console.error('Error deleting agency:', error);
@@ -495,13 +584,54 @@
             }
         }
 
-        // UI Functions
+        // API calls for Block Bookings
+        async function fetchBlockBookings() {
+            try {
+                showLoading();
+                const response = await fetch(`${BOOKING_API_URL}/block`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                blockBookings = await response.json();
+                loadBlockBookingsTable();
+                updateStats();
+            } catch (error) {
+                console.error('Error fetching block bookings:', error);
+                // Don't show error if endpoint doesn't exist yet
+                blockBookings = [];
+                loadBlockBookingsTable();
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function createBlockBooking(bookingData) {
+            try {
+                showLoading();
+                const response = await fetch(`${BOOKING_API_URL}/block`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookingData)
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const newBooking = await response.json();
+                blockBookings.push(newBooking);
+                loadBlockBookingsTable();
+                updateStats();
+                return newBooking;
+            } catch (error) {
+                console.error('Error creating block booking:', error);
+                throw error;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // UI Functions - Travel Agencies
         function loadAgenciesTable() {
             const tbody = document.getElementById('agenciesTableBody');
             tbody.innerHTML = '';
 
             if (travelAgencies.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No travel agencies found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No travel agencies found</td></tr>';
                 return;
             }
 
@@ -516,16 +646,28 @@
                         <td>${agency.name || ''}</td>
                         <td>${agency.email || ''}</td>
                         <td>${agency.phone || ''}</td>
-                        <td>${agency.address || ''}</td>
                         <td><strong>${agency.discountPercentage || 0}%</strong></td>
                         <td>${prepaymentBadge}</td>
                         <td>
                             <button class="btn btn-outline-primary btn-sm me-1" onclick="showAgencyForm(${agency.id})" title="Edit">
                                 <i class="fas fa-pencil-alt"></i>
                             </button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="confirmDeleteAgency(${agency.id})" title="Delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </td>
                     </tr>
                 `);
+            });
+        }
+
+        function loadAgencySelects() {
+            const select = document.getElementById('blockAgencySelect');
+            select.innerHTML = '<option value="">Select Agency...</option>';
+
+            travelAgencies.forEach(agency => {
+                select.insertAdjacentHTML('beforeend',
+                    `<option value="${agency.id}">${agency.name}</option>`);
             });
         }
 
@@ -537,7 +679,6 @@
 
             const agency = travelAgencies.find(a => a.id === agencyId) || {};
 
-            // Populate form fields
             document.getElementById('agencyName').value = agency.name || '';
             document.getElementById('agencyEmail').value = agency.email || '';
             document.getElementById('agencyPhone').value = agency.phone || '';
@@ -545,48 +686,19 @@
             document.getElementById('agencyDiscount').value = agency.discountPercentage || 0;
             document.getElementById('prepaymentRequired').checked = agency.prepaymentRequired || false;
 
-            // Show/hide delete button
             document.getElementById('deleteAgencyBtn').style.display = isAdd ? 'none' : 'inline-block';
 
-            // Transition
-            const tableWrapper = document.getElementById('agenciesTableWrapper');
-            const formWrapper = document.getElementById('agencyFormWrapper');
-
-            tableWrapper.classList.add('fade-out');
-            setTimeout(() => {
-                tableWrapper.style.display = 'none';
-                formWrapper.style.display = 'block';
-                formWrapper.classList.add('fade-in');
-                formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 300);
+            showForm('agenciesTableWrapper', 'agencyFormWrapper');
         }
 
         function hideAgencyForm() {
-            const tableWrapper = document.getElementById('agenciesTableWrapper');
-            const formWrapper = document.getElementById('agencyFormWrapper');
-
-            formWrapper.classList.remove('fade-in');
-            formWrapper.classList.add('fade-out');
-
-            setTimeout(() => {
-                formWrapper.style.display = 'none';
-                formWrapper.classList.remove('fade-out');
-                tableWrapper.style.display = 'block';
-                tableWrapper.classList.remove('fade-out');
-                tableWrapper.classList.add('fade-in');
-                document.getElementById('agencyForm').reset();
-            }, 300);
+            hideForm('agenciesTableWrapper', 'agencyFormWrapper');
+            document.getElementById('agencyForm').reset();
         }
 
         function showCreateAgency() {
             document.getElementById('agencyForm').reset();
             showAgencyForm(null, true);
-        }
-
-        function showCreateBlockBooking() {
-            // Switch to bookings tab
-            const bookingsTab = new bootstrap.Tab(document.getElementById('bookings-tab'));
-            bookingsTab.show();
         }
 
         async function saveAgency(event) {
@@ -656,6 +768,268 @@
             }
         }
 
+        // UI Functions - Block Bookings
+        function loadBlockBookingsTable() {
+            const tbody = document.getElementById('blockBookingsTableBody');
+            tbody.innerHTML = '';
+
+            if (blockBookings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No block bookings found</td></tr>';
+                return;
+            }
+
+            blockBookings.forEach(booking => {
+                const statusClass = {
+                    'CONFIRMED': 'bg-success',
+                    'PENDING': 'bg-warning text-dark',
+                    'CANCELLED': 'bg-danger'
+                }[booking.bookingStatus] || 'bg-secondary';
+
+                const agencyName = travelAgencies.find(a => a.id === booking.travelAgencyId)?.name || 'Unknown Agency';
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><strong>${booking.bookingReference || booking.id}</strong></td>
+                        <td>${agencyName}</td>
+                        <td>${new Date(booking.checkInDate).toLocaleDateString()}</td>
+                        <td>${new Date(booking.checkOutDate).toLocaleDateString()}</td>
+                        <td>${booking.numberOfNights}</td>
+                        <td>${booking.numberOfRooms}</td>
+                        <td><strong>$${(booking.totalAmount || 0).toLocaleString()}</strong></td>
+                        <td><span class="badge ${statusClass}">${booking.bookingStatus}</span></td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm" onclick="showBlockBookingForm(${booking.id})" title="Edit">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        function showBlockBookingForm(bookingId = null, isAdd = false) {
+            document.getElementById('blockBookingId').value = bookingId || '';
+            document.getElementById('blockBookingFormTitle').innerHTML = isAdd ?
+                '<i class="fas fa-calendar-plus me-2"></i>New Block Booking' :
+                '<i class="fas fa-edit me-2"></i>Edit Block Booking';
+
+            const booking = blockBookings.find(b => b.id === bookingId) || {};
+
+            // Populate form with booking data if editing
+            if (bookingId) {
+                document.getElementById('blockAgencySelect').value = booking.travelAgencyId || '';
+                document.getElementById('blockReference').value = booking.blockReference || '';
+                document.getElementById('blockCheckInDate').value = booking.checkInDate || '';
+                document.getElementById('blockCheckOutDate').value = booking.checkOutDate || '';
+                document.getElementById('blockGroupSize').value = booking.groupSize || '';
+                document.getElementById('blockStandardRooms').value = booking.standardRooms || 0;
+                document.getElementById('blockDeluxeRooms').value = booking.deluxeRooms || 0;
+                document.getElementById('blockSuiteRooms').value = booking.suiteRooms || 0;
+                document.getElementById('blockMealPlan').value = booking.mealPlan || 'ROOM_ONLY';
+                document.getElementById('blockSpecialRequirements').value = booking.specialRequirements || '';
+
+                calculateBlockNights();
+                updateBlockRoomDistribution();
+                validateBlockAgency();
+            }
+
+            document.getElementById('deleteBlockBtn').style.display = isAdd ? 'none' : 'inline-block';
+
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('blockCheckInDate').min = today;
+            document.getElementById('blockCheckOutDate').min = today;
+
+            showForm('blockBookingsTableWrapper', 'blockBookingFormWrapper');
+        }
+
+        function hideBlockBookingForm() {
+            hideForm('blockBookingsTableWrapper', 'blockBookingFormWrapper');
+            document.getElementById('blockBookingForm').reset();
+        }
+
+        function showCreateBlockBooking() {
+            document.getElementById('blockBookingForm').reset();
+            document.getElementById('blockStandardRooms').value = 0;
+            document.getElementById('blockDeluxeRooms').value = 0;
+            document.getElementById('blockSuiteRooms').value = 0;
+            updateBlockRoomDistribution();
+
+            // Switch to bookings tab
+            const bookingsTab = new bootstrap.Tab(document.getElementById('bookings-tab'));
+            bookingsTab.show();
+
+            setTimeout(() => showBlockBookingForm(null, true), 100);
+        }
+
+        function validateBlockAgency() {
+            const agencyId = document.getElementById('blockAgencySelect').value;
+            const agencyInfo = document.getElementById('blockAgencyInfo');
+
+            if (agencyId) {
+                const agency = travelAgencies.find(a => a.id == agencyId);
+                if (agency) {
+                    document.getElementById('blockDiscountPercent').value = agency.discountPercentage || 0;
+                    if (agency.prepaymentRequired) {
+                        document.getElementById('blockPaymentTerms').value = 'FULL_ADVANCE';
+                    }
+
+                    agencyInfo.innerHTML = `
+                        <div class="alert alert-info">
+                            <strong>Agency:</strong> ${agency.name}<br>
+                            <strong>Default Discount:</strong> ${agency.discountPercentage || 0}%<br>
+                            <strong>Prepayment:</strong> ${agency.prepaymentRequired ? 'Required' : 'Not Required'}
+                        </div>
+                    `;
+                    agencyInfo.style.display = 'block';
+                    calculateBlockTotal();
+                }
+            } else {
+                agencyInfo.style.display = 'none';
+            }
+        }
+
+        function calculateBlockNights() {
+            const checkIn = new Date(document.getElementById('blockCheckInDate').value);
+            const checkOut = new Date(document.getElementById('blockCheckOutDate').value);
+
+            if (checkIn && checkOut && checkOut > checkIn) {
+                const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+                document.getElementById('blockNumberOfNights').value = nights;
+                calculateBlockTotal();
+            }
+        }
+
+        function updateBlockRoomDistribution() {
+            const standard = parseInt(document.getElementById('blockStandardRooms').value) || 0;
+            const deluxe = parseInt(document.getElementById('blockDeluxeRooms').value) || 0;
+            const suite = parseInt(document.getElementById('blockSuiteRooms').value) || 0;
+            const total = standard + deluxe + suite;
+
+            document.getElementById('totalRoomsDisplay').textContent = total;
+
+            const validationMessage = document.getElementById('roomValidationMessage');
+            if (total < 3) {
+                validationMessage.style.display = 'inline';
+            } else {
+                validationMessage.style.display = 'none';
+            }
+
+            calculateBlockTotal();
+        }
+
+        function calculateBlockTotal() {
+            const nights = parseInt(document.getElementById('blockNumberOfNights').value) || 0;
+            const standard = parseInt(document.getElementById('blockStandardRooms').value) || 0;
+            const deluxe = parseInt(document.getElementById('blockDeluxeRooms').value) || 0;
+            const suite = parseInt(document.getElementById('blockSuiteRooms').value) || 0;
+            const discount = parseFloat(document.getElementById('blockDiscountPercent').value) || 0;
+
+            const subtotal = nights * ((standard * roomRates.standard) + (deluxe * roomRates.deluxe) + (suite * roomRates.suite));
+            const discountAmount = subtotal * (discount / 100);
+            const total = subtotal - discountAmount;
+
+            document.getElementById('blockSubtotal').value = '$' + subtotal.toLocaleString();
+            document.getElementById('blockDiscountAmount').value = '$' + discountAmount.toLocaleString();
+            document.getElementById('blockTotalAmount').value = '$' + total.toLocaleString();
+
+            calculateBlockAdvance();
+        }
+
+        function calculateBlockAdvance() {
+            const totalText = document.getElementById('blockTotalAmount').value;
+            const total = parseFloat(totalText.replace(/[$,]/g, '')) || 0;
+            const paymentTerms = document.getElementById('blockPaymentTerms').value;
+
+            let advancePercent = 100;
+            if (paymentTerms === 'FIFTY_ADVANCE') advancePercent = 50;
+            if (paymentTerms === 'THIRTY_ADVANCE') advancePercent = 30;
+
+            const advanceAmount = total * (advancePercent / 100);
+            document.getElementById('blockAdvanceAmount').value = '$' + advanceAmount.toLocaleString();
+        }
+
+        async function saveBlockBooking(event) {
+            event.preventDefault();
+
+            const form = document.getElementById('blockBookingForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return false;
+            }
+
+            const totalRooms = parseInt(document.getElementById('totalRoomsDisplay').textContent);
+            if (totalRooms < 3) {
+                showError('Minimum 3 rooms required for block booking');
+                return false;
+            }
+
+            const agencyId = parseInt(document.getElementById('blockAgencySelect').value);
+            if (!agencyId) {
+                showError('Please select a travel agency');
+                return false;
+            }
+
+            const bookingData = {
+                travelAgencyId: agencyId,
+                blockReference: document.getElementById('blockReference').value,
+                checkInDate: document.getElementById('blockCheckInDate').value,
+                checkOutDate: document.getElementById('blockCheckOutDate').value,
+                numberOfNights: parseInt(document.getElementById('blockNumberOfNights').value),
+                numberOfRooms: totalRooms,
+                standardRooms: parseInt(document.getElementById('blockStandardRooms').value) || 0,
+                deluxeRooms: parseInt(document.getElementById('blockDeluxeRooms').value) || 0,
+                suiteRooms: parseInt(document.getElementById('blockSuiteRooms').value) || 0,
+                groupSize: parseInt(document.getElementById('blockGroupSize').value) || null,
+                discountPercentage: parseFloat(document.getElementById('blockDiscountPercent').value) || 0,
+                paymentTerms: document.getElementById('blockPaymentTerms').value,
+                mealPlan: document.getElementById('blockMealPlan').value,
+                specialRequirements: document.getElementById('blockSpecialRequirements').value,
+                bookingStatus: 'PENDING',
+                paymentStatus: 'PENDING'
+            };
+
+            try {
+                await createBlockBooking(bookingData);
+                showSuccess('Block booking created successfully!');
+                hideBlockBookingForm();
+            } catch (error) {
+                showError('Failed to create block booking. Please try again.');
+            }
+
+            return false;
+        }
+
+        // Common UI functions
+        function showForm(hideElement, showElement) {
+            const tableWrapper = document.getElementById(hideElement);
+            const formWrapper = document.getElementById(showElement);
+
+            tableWrapper.classList.add('fade-out');
+            setTimeout(() => {
+                tableWrapper.style.display = 'none';
+                formWrapper.style.display = 'block';
+                formWrapper.classList.add('fade-in');
+                formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+
+        function hideForm(showElement, hideElement) {
+            const tableWrapper = document.getElementById(showElement);
+            const formWrapper = document.getElementById(hideElement);
+
+            formWrapper.classList.remove('fade-in');
+            formWrapper.classList.add('fade-out');
+
+            setTimeout(() => {
+                formWrapper.style.display = 'none';
+                formWrapper.classList.remove('fade-out');
+                tableWrapper.style.display = 'block';
+                tableWrapper.classList.remove('fade-out');
+                tableWrapper.classList.add('fade-in');
+            }, 300);
+        }
+
         function updateStats() {
             const totalAgencies = travelAgencies.length;
             const prepaidAgencies = travelAgencies.filter(a => a.prepaymentRequired).length;
@@ -663,7 +1037,7 @@
                 (travelAgencies.reduce((sum, a) => sum + (a.discountPercentage || 0), 0) / totalAgencies) : 0;
 
             document.getElementById('totalAgenciesCount').textContent = totalAgencies;
-            document.getElementById('activeBookingsCount').textContent = '0'; // Will be updated when bookings are implemented
+            document.getElementById('blockBookingsCount').textContent = blockBookings.length;
             document.getElementById('avgDiscount').textContent = avgDiscount.toFixed(1) + '%';
             document.getElementById('prepaidAgencies').textContent = prepaidAgencies;
         }
@@ -671,11 +1045,12 @@
         // Initialize when page loads
         window.addEventListener('DOMContentLoaded', () => {
             fetchAgencies();
+            fetchBlockBookings();
         });
 
         // Handle tab changes
         document.getElementById('bookings-tab').addEventListener('shown.bs.tab', function (e) {
-            // Future: Load bookings when tab is shown
+            fetchBlockBookings();
         });
     </script>
 </body>

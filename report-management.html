@@ -842,19 +842,26 @@
                 document.getElementById('checkedInCount').textContent = data.checkedIn;
                 document.getElementById('noShowCount').textContent = data.noShow;
                 document.getElementById('occupancyPercentage').textContent = ((data.checkedIn / data.totalRooms) * 100).toFixed(1) + '%';
+                document.getElementById('totalRoomsCount').textContent = data.totalRooms;
+                document.getElementById('avgOccupancy').textContent = ((data.checkedIn / data.totalRooms) * 100).toFixed(1) + '%';
+
 
 
                 // Update table
                 const tbody = document.getElementById('occupancyTableBody');
-                tbody.innerHTML = `
-      <tr>
-        <td>${startDate} to ${endDate}</td>
-        <td>${data.totalRooms}</td>
-        <td>${data.checkedIn}</td>
-        <td>${data.noShow}</td>
-        <td>${((data.checkedIn / data.totalRooms) * 100).toFixed(1)}%</td>
-      </tr>
-    `;
+                <tbody id="occupancyTableBody">
+                    <tr>
+                        <td>${startDate} to ${endDate}</td>
+                        <td>${data.totalRooms}</td>
+                        <td>${data.checkedIn}</td>
+                        <td>${((data.checkedIn / data.totalRooms) * 100).toFixed(1)}%</td>
+                        <td>${data.standard}</td>
+                        <td>${data.deluxe}</td>
+                        <td>${data.suite}</td>
+                        <td>${data.noShow}</td>
+                    </tr>
+                </tbody>
+
 
                 // Update chart
                 const ctx = document.getElementById('occupancyTrendChart').getContext('2d');

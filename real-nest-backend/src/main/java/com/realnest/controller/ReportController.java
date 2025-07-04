@@ -18,12 +18,12 @@ public class ReportController {
     private ReportService reportService;
 
     @GetMapping("/summary")
-    public ResponseEntity<Map<String, Object>> getBookingSummary(
-            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+    public ResponseEntity<Map<String, Object>> getSummary(
+            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
 
-        Map<String, Object> summary = reportService.getBookingSummary(startDate, endDate);
-        return ResponseEntity.ok(summary);
+        Map<String, Object> result = reportService.getBookingSummary(start, end);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/no-shows")
